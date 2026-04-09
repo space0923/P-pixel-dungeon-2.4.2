@@ -22,9 +22,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeistManager;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -939,6 +941,8 @@ public class WndSettings extends WndTabbed {
 		ColorBlock sep3;
 		CheckBox chkIgnoreSilent;
 		CheckBox chkMusicBG;
+		ColorBlock sep4;
+		RedButton btnHeistMusic;
 
 		@Override
 		protected void createChildren() {
@@ -1031,6 +1035,20 @@ public class WndSettings extends WndTabbed {
 				chkMusicBG.checked(SPDSettings.playMusicInBackground());
 				add(chkMusicBG);
 			}
+
+			// Heist music settings — only available after first good ending
+			if (Badges.isUnlocked(Badges.Badge.HAPPY_END) || DeviceCompat.isDebug()) {
+				sep4 = new ColorBlock(1, 1, 0xFF000000);
+				add(sep4);
+
+				btnHeistMusic = new RedButton(Messages.get(this, "heist_music"), 9) {
+					@Override
+					protected void onClick() {
+						ShatteredPixelDungeon.scene().addToFront(new WndHeistMusic());
+					}
+				};
+				add(btnHeistMusic);
+			}
 		}
 
 		@Override
@@ -1074,6 +1092,14 @@ public class WndSettings extends WndTabbed {
 
 				chkMusicBG.setRect(0, sep3.y + 1 + GAP, width, BTN_HEIGHT);
 				height = chkMusicBG.bottom();
+			}
+
+			if (btnHeistMusic != null) {
+				sep4.size(width, 1);
+				sep4.y = height + GAP;
+
+				btnHeistMusic.setRect(0, sep4.y + 1 + GAP, width, BTN_HEIGHT);
+				height = btnHeistMusic.bottom();
 			}
 		}
 

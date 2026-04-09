@@ -38,7 +38,7 @@ public class FetidRat extends Rat {
 	{
 		spriteClass = FetidRatSprite.class;
 
-		HP = HT = 20;
+		HP = HT = 240;
 		defenseSkill = 5;
 
 		EXP = 4;
@@ -57,7 +57,7 @@ public class FetidRat extends Rat {
 
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Char.combatRoll(0, 2);
+		return super.drRoll() + Char.combatRoll(15, 20);
 	}
 
 	@Override

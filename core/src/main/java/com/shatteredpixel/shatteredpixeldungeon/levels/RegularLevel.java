@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GuardBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.EbonyMimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GoldenMimic;
@@ -297,6 +298,32 @@ public abstract class RegularLevel extends Level {
 				losBlocking[m.pos] = false;
 			}
 
+		}
+
+		// Heist system: assign GuardBuff to some mobs
+		// 10% chance per mob, guaranteed minimum 2 guards per level
+		ArrayList<Mob> enemyMobs = new ArrayList<>();
+		for (Mob m : mobs) {
+			if (m.alignment == Char.Alignment.ENEMY) {
+				enemyMobs.add(m);
+			}
+		}
+
+		int guardCount = 0;
+		for (Mob m : enemyMobs) {
+			if (Random.Float() < 0.10f) {
+				Buff.affect(m, GuardBuff.class);
+				guardCount++;
+			}
+		}
+
+		// Guarantee at least 2 guards if enough mobs exist
+		while (guardCount < 2 && guardCount < enemyMobs.size()) {
+			Mob m = Random.element(enemyMobs);
+			if (m.buff(GuardBuff.class) == null) {
+				Buff.affect(m, GuardBuff.class);
+				guardCount++;
+			}
 		}
 
 	}

@@ -44,7 +44,7 @@ public class Swarm extends Mob {
 	{
 		spriteClass = SwarmSprite.class;
 		
-		HP = HT = 50;
+		HP = HT = 120;
 		defenseSkill = 5;
 
 		EXP = 3;
@@ -77,7 +77,7 @@ public class Swarm extends Mob {
 	
 	@Override
 	public int damageRoll() {
-		return Char.combatRoll( 1, 4 );
+		return Char.combatRoll( 10, 14 );
 	}
 	
 	@Override

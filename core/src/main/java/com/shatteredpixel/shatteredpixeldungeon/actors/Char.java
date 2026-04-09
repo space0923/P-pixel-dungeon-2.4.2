@@ -51,7 +51,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GuardBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeistManager;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LifeLink;
@@ -83,6 +85,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGeomancer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
@@ -95,6 +98,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
@@ -462,6 +466,27 @@ public abstract class Char extends Actor {
 
 			enemy.damage( effectiveDamage, this );
 
+			// Heist system: check if this attack should trigger the alarm
+			if (this instanceof Hero && Dungeon.heistManager != null
+					&& Dungeon.heistManager.phase == HeistManager.Phase.STEALTH) {
+				Dungeon.heistManager.triggerAlarm();
+				Hero h = (Hero) this;
+				KindOfWeapon wep = h.belongings.attackingWeapon();
+				// Non-silenced weapon attack
+				if (wep == null || !wep.isSilenced()) {
+					// Check if any mob on the level can see the hero
+					for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+						if (mob.alignment == Alignment.ENEMY
+								&& mob != enemy
+								&& mob.fieldOfView != null
+								&& mob.fieldOfView[h.pos]) {
+							Dungeon.heistManager.triggerAlarm();
+							break;
+						}
+					}
+				}
+			}
+
 			if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
 			if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
 
@@ -783,11 +808,6 @@ public abstract class Char extends Actor {
 		shielded -= dmg;
 		HP -= dmg;
 
-		if (HP > 0 && shielded > 0 && shielding() == 0){
-			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
-				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
-			}
-		}
 
 		if (HP > 0 && buff(Grim.GrimTracker.class) != null){
 

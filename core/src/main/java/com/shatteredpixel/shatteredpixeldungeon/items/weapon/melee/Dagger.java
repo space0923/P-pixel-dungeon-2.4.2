@@ -50,6 +50,8 @@ public class Dagger extends MeleeWeapon {
 		tier = 10;
 		RCH = 2;
 		DLY	= 0.5f;
+
+		silenced = true; // Quiet stabbing weapon
 		
 		bones = false;
 	}

@@ -28,7 +28,7 @@ import com.watabou.utils.Random;
 public class HeistManager implements Bundlable {
 
 	public enum Phase {
-		CASING,
+		STEALTH,
 		CONTROL,
 		ANTICIPATION,
 		ASSAULT,
@@ -47,7 +47,7 @@ public class HeistManager implements Bundlable {
 		SET       // 2
 	}
 
-	public Phase phase = Phase.CASING;
+	public Phase phase = Phase.STEALTH;
 	public float phaseTimer = 0;        // seconds remaining in current phase
 	public int assaultWaveCount = 0;    // how many assault waves this biome
 	public boolean inShop = false;      // whether hero is currently in a shop room
@@ -100,7 +100,7 @@ public class HeistManager implements Bundlable {
 	// Called when entering a new floor — resets if new biome
 	public void onFloorChange(int oldDepth, int newDepth) {
 		if (biomeFor(oldDepth) != biomeFor(newDepth)) {
-			phase = Phase.CASING;
+			phase = Phase.STEALTH;
 			phaseTimer = 0;
 			assaultWaveCount = 0;
 			// Resolve track for the new biome
@@ -110,9 +110,9 @@ public class HeistManager implements Bundlable {
 		inShop = false;
 	}
 
-	// Called to trigger the alarm — only works from CASING phase
+	// Called to trigger the alarm — only works from STEALTH phase
 	public void triggerAlarm() {
-		if (phase != Phase.CASING) return;
+		if (phase != Phase.STEALTH) return;
 
 		phase = Phase.CONTROL;
 		phaseTimer = CONTROL_DURATION;
@@ -140,7 +140,7 @@ public class HeistManager implements Bundlable {
 	 * @param elapsed seconds since last frame (Game.elapsed)
 	 */
 	public void update(float elapsed) {
-		if (phase == Phase.CASING) {
+		if (phase == Phase.STEALTH) {
 			return; // nothing to do in stealth
 		}
 
@@ -192,7 +192,7 @@ public class HeistManager implements Bundlable {
 		int extras = Math.min(6, Random.IntRange(2, 4) + (assaultWaveCount - 1));
 
 		for (int i = 0; i < extras; i++) {
-			if (Dungeon.level.spawnMob(12)) {
+			if (Dungeon.level.spawnMob(12) || Dungeon.level.spawnMob(6)) {
 				// spawnMob will handle HUNTING state + AssaultAlert buff via Level.java
 			}
 		}
@@ -208,11 +208,11 @@ public class HeistManager implements Bundlable {
 
 		String phaseName;
 		switch (phase) {
-			case CASING:       phaseName = "casing";       break;
+			case STEALTH:      phaseName = "stealth";      break;
 			case CONTROL:      phaseName = "control";      break;
 			case ANTICIPATION: phaseName = "anticipation"; break;
-			case ASSAULT:      phaseName = "assault";      break;
-			case FADE:         phaseName = "fade";         break;
+			case ASSAULT:
+			case FADE:         phaseName = "assault";      break;
 			default: return;
 		}
 
@@ -245,8 +245,10 @@ public class HeistManager implements Bundlable {
 		}
 
 		if (inShop && !wasInShop) {
-			// Entered shop — play current track's shop intro+loop
-			playCurrentTrack("shop");
+			// Entered shop — play shared shop intro+loop
+			String intro = Assets.Music.HEIST_MUSIC_DIR + "shop_intro.ogg";
+			String loop  = Assets.Music.HEIST_MUSIC_DIR + "shop_loop.ogg";
+			Music.INSTANCE.playWithIntro(intro, loop);
 		} else if (!inShop && wasInShop) {
 			// Left shop — resume current phase music
 			playPhaseMusic();

@@ -78,6 +78,66 @@ public enum Music {
 		play(assetName, null);
 	}
 
+	/**
+	 * Plays an intro track once, then seamlessly transitions to a looping track.
+	 * Used by the heist music system (Payday-style intro + loop per phase).
+	 */
+	public synchronized void playWithIntro( String introAsset, final String loopAsset ) {
+
+		//iOS cannot play ogg, so we use an mp3 alternative instead
+		String intro = introAsset;
+		String loop = loopAsset;
+		if (DeviceCompat.isiOS()){
+			if (intro != null) intro = intro.replace(".ogg", ".mp3");
+			if (loop != null) loop = loop.replace(".ogg", ".mp3");
+		}
+
+		// If the loop track is already playing (e.g. returning from shop), don't restart
+		if (isPlaying() && lastPlayed != null && lastPlayed.equals( loop )) {
+			player.setVolume(volumeWithFade());
+			return;
+		}
+
+		stop();
+
+		lastPlayed = loop; // treat the loop as the "identity" of this music
+		trackList = null;
+		this.looping = false; // intro doesn't loop; the completion listener handles it
+		this.shuffle = false;
+
+		if (!enabled || intro == null || loop == null) {
+			return;
+		}
+
+		final String finalLoop = loop;
+		play(intro, new com.badlogic.gdx.audio.Music.OnCompletionListener() {
+			@Override
+			public void onCompletion(com.badlogic.gdx.audio.Music music) {
+				if (fadeTotal == -1f) {
+					if (!DeviceCompat.isDesktop()) {
+						new Thread() {
+							@Override
+							public void run() {
+								playLoopAfterIntro(music, finalLoop);
+							}
+						}.start();
+					} else {
+						playLoopAfterIntro(music, finalLoop);
+					}
+				}
+			}
+		});
+	}
+
+	private synchronized void playLoopAfterIntro(com.badlogic.gdx.audio.Music music, String loopTrack) {
+		if (music != player || player == null) {
+			return;
+		}
+		stop();
+		looping = true;
+		play(loopTrack, null);
+	}
+
 	public synchronized void playTracks( String[] tracks, float[] chances, boolean shuffle){
 
 		if (tracks == null || tracks.length == 0 || tracks.length != chances.length){

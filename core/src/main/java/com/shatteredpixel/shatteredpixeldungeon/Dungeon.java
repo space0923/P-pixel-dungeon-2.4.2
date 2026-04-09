@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeistManager;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
@@ -191,6 +192,8 @@ public class Dungeon {
 	public static Hero hero;
 	public static Level level;
 
+	public static HeistManager heistManager;
+
 	public static QuickSlot quickslot = new QuickSlot();
 	
 	public static int depth;
@@ -286,6 +289,9 @@ public class Dungeon {
 		Badges.reset();
 		
 		GamesInProgress.selectedClass.initHero( hero );
+
+		heistManager = new HeistManager();
+		heistManager.init();
 	}
 
 	public static boolean isChallenged( int mask ) {
@@ -303,16 +309,19 @@ public class Dungeon {
 		
 		Level level;
 		if (branch == 0) {
-			switch (depth) {
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-					level = new SewerLevel();
-					break;
-				case 5:
-					level = new SewerBossLevel();
-					break;
+			if (depth >= 26 && depth <= 50) {
+				level = new CavesLevel();
+			} else {
+				switch (depth) {
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+						level = new SewerLevel();
+						break;
+					case 5:
+						level = new SewerBossLevel();
+						break;
 				case 6:
 				case 7:
 				case 8:
@@ -347,13 +356,14 @@ public class Dungeon {
 					level = new HallsLevel();
 					break;
 				case 25:
-					level = new HallsBossLevel();
-					break;
-				case 26:
-					level = new LastLevel();
-					break;
-				default:
-					level = new DeadEndLevel();
+						level = new HallsBossLevel();
+						break;
+					case 51:
+						level = new LastLevel();
+						break;
+					default:
+						level = new DeadEndLevel();
+				}
 			}
 		} else if (branch == 1) {
 			switch (depth) {
@@ -413,7 +423,7 @@ public class Dungeon {
 
 	public static long seedForDepth(int depth, int branch){
 		int lookAhead = depth;
-		lookAhead += 30*branch; //Assumes depth is always 1-30, and branch is always 0 or higher
+		lookAhead += 100*branch; //Assumes depth is always 1-100, and branch is always 0 or higher
 
 		Random.pushGenerator( seed );
 
@@ -459,6 +469,8 @@ public class Dungeon {
 	
 	public static void switchLevel( final Level level, int pos ) {
 
+		int oldDepth = depth;
+
 		//Position of -2 specifically means trying to place the hero the exit
 		if (pos == -2){
 			LevelTransition t = level.getTransition(LevelTransition.Type.REGULAR_EXIT);
@@ -482,6 +494,11 @@ public class Dungeon {
 		}
 
 		Mob.restoreAllies( level, pos );
+
+		// Heist system: check for biome reset on floor change
+		if (heistManager != null) {
+			heistManager.onFloorChange(oldDepth, depth);
+		}
 
 		Actor.init();
 
@@ -672,6 +689,12 @@ public class Dungeon {
 			Notes.storeInBundle( bundle );
 			Generator.storeInBundle( bundle );
 
+			if (heistManager != null) {
+				Bundle heistBundle = new Bundle();
+				heistManager.storeInBundle(heistBundle);
+				bundle.put("heist_manager", heistBundle);
+			}
+
 			int[] bundleArr = new int[generatedLevels.size()];
 			for (int i = 0; i < generatedLevels.size(); i++){
 				bundleArr[i] = generatedLevels.get(i);
@@ -806,6 +829,13 @@ public class Dungeon {
 
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
+
+		if (bundle.contains("heist_manager")) {
+			heistManager = new HeistManager();
+			heistManager.restoreFromBundle(bundle.getBundle("heist_manager"));
+		} else {
+			heistManager = new HeistManager();
+		}
 
 		generatedLevels.clear();
 		if (bundle.contains(GENERATED_LEVELS)){

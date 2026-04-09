@@ -64,13 +64,13 @@ public class GuardBuff extends Buff {
 
 	/**
 	 * Called when the guard is alerted — spots the hero or takes damage.
-	 * Only triggers during CASING phase (no point fleeing if alarm already went off).
+	 * Only triggers during STEALTH phase (no point fleeing if alarm already went off).
 	 */
 	public void alert() {
 		if (!fleeing && target instanceof Mob) {
-			// Only flee if we're still in casing mode
+			// Only flee if we're still in stealth mode
 			if (Dungeon.heistManager != null
-					&& Dungeon.heistManager.phase == HeistManager.Phase.CASING) {
+					&& Dungeon.heistManager.phase == HeistManager.Phase.STEALTH) {
 				fleeing = true;
 				Mob mob = (Mob) target;
 				mob.state = mob.FLEEING;

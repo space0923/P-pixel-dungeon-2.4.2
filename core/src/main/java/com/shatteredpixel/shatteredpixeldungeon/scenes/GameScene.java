@@ -92,6 +92,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeistIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.LootIndicator;
@@ -373,6 +374,12 @@ public class GameScene extends PixelScene {
 		boss.camera = uiCamera;
 		boss.setPos( 6 + (uiCamera.width - boss.width())/2, 20);
 		add(boss);
+
+		// Heist system phase indicator
+		HeistIndicator heistIndicator = new HeistIndicator();
+		heistIndicator.camera = uiCamera;
+		heistIndicator.setPos((uiCamera.width - heistIndicator.width()) / 2f, 32);
+		add(heistIndicator);
 
 		resume = new ResumeIndicator();
 		resume.camera = uiCamera;
@@ -708,6 +715,11 @@ public class GameScene extends PixelScene {
 		super.update();
 
 		if (notifyDelay > 0) notifyDelay -= Game.elapsed;
+
+		// Tick heist phase timer in real-time
+		if (Dungeon.heistManager != null) {
+			Dungeon.heistManager.update(Game.elapsed);
+		}
 
 		if (!Emitter.freezeEmitters) water.offset( 0, -5 * Game.elapsed );
 

@@ -88,7 +88,7 @@ public class BrokenSeal extends Item {
 	}
 
 	public int maxShield( int armTier, int armLvl ){
-		return armTier + armLvl + Dungeon.hero.pointsInTalent(Talent.IRON_WILL);
+		return (armTier * 10) + (armLvl * 2 ) + Dungeon.hero.pointsInTalent(Talent.IRON_WILL) * 5;
 	}
 
 	@Override
@@ -204,7 +204,7 @@ public class BrokenSeal extends Item {
 		public synchronized boolean act() {
 			if (Regeneration.regenOn() && shielding() < maxShield()) {
 				spend(TICK);
-				partialShield += 20f;
+				partialShield += (armor.tier * 2f) + (armor.level() * 1f);
 			}
 			
 			while (partialShield >= 1){

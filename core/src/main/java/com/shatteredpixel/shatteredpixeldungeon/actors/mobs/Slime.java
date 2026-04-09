@@ -34,8 +34,8 @@ public class Slime extends Mob {
 	{
 		spriteClass = SlimeSprite.class;
 		
-		HP = HT = 20;
-		defenseSkill = 5;
+		HP = HT = 120;
+		defenseSkill = 10;
 		
 		EXP = 4;
 		maxLvl = 9;
@@ -45,7 +45,7 @@ public class Slime extends Mob {
 	
 	@Override
 	public int damageRoll() {
-		return Char.combatRoll( 2, 5 );
+		return Char.combatRoll( 12, 15 );
 	}
 	
 	@Override

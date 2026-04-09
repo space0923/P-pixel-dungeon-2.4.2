@@ -33,6 +33,8 @@ public class ThrowingKnife extends MissileWeapon {
 		image = ItemSpriteSheet.THROWING_KNIFE;
 		hitSound = Assets.Sounds.HIT_SLASH;
 		hitSoundPitch = 1.2f;
+
+		silenced = true; // Silent ranged weapon
 		
 		bones = false;
 		

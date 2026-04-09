@@ -20,7 +20,7 @@ import com.watabou.noosa.Game;
  * HUD indicator showing the current heist phase.
  * Displays in the top-right area of the screen.
  *
- * CASING:       Gray text "STEALTH"
+ * STEALTH:      Gray text "STEALTH"
  * CONTROL:      Flashing yellow "ALARM!"
  * ANTICIPATION: Pulsing yellow "GET READY"
  * ASSAULT/FADE: Pulsing red "ASSAULT #N" (fade is a hidden sub-state)
@@ -108,7 +108,7 @@ public class HeistIndicator extends Tag {
 		int color;
 
 		switch (phase) {
-			case CASING:
+			case STEALTH:
 				text = "STEALTH";
 				color = 0x8899AA;
 				setColor(0x1A2633);
@@ -138,7 +138,11 @@ public class HeistIndicator extends Tag {
 		phaseText.text(text);
 		phaseText.hardlight(color);
 		phaseText.measure();
+		float oldWidth = width;
 		setSize(Math.max(80, phaseText.width() + 12), 16);
+		if (width != oldWidth) {
+			x -= (width - oldWidth) / 2f;
+		}
 		layout();
 	}
 }

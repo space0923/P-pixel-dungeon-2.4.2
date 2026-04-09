@@ -84,8 +84,8 @@ public class Bee extends Mob {
 	public void spawn( int level ) {
 		this.level = level;
 		
-		HT = (2 + level) * 4;
-		defenseSkill = 9 + level;
+		HT = 240;
+		defenseSkill = 5;
 	}
 
 	public void setPotInfo(int potPos, Char potHolder){
@@ -111,7 +111,7 @@ public class Bee extends Mob {
 	
 	@Override
 	public int damageRoll() {
-		return Char.combatRoll( HT / 10, HT / 4 );
+		return Char.combatRoll( 25, 30 );
 	}
 	
 	@Override

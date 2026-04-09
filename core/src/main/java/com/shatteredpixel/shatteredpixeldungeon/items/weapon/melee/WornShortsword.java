@@ -31,13 +31,14 @@ public class WornShortsword extends MeleeWeapon {
 
 	{
 		image = ItemSpriteSheet.WORN_SHORTSWORD;
-		hitSound = Assets.Sounds.HIT_SLASH;
-		hitSoundPitch = 1.1f;
+		hitSound = Assets.Sounds.HIT_Chimano88;
+		hitSoundPitch = 1f;
 
 		tier = 10;
 		RCH = 2;
 		DLY	= 0.5f;
 
+		silenced = true; // Chimano88 with suppressor
 		
 		bones = false;
 	}

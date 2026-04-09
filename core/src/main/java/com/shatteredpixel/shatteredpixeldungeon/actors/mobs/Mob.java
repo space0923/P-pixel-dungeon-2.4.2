@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GuardBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
@@ -756,6 +757,12 @@ public abstract class Mob extends Char {
 			}
 			if (state != HUNTING && !(src instanceof Corruption)) {
 				alerted = true;
+			}
+
+			// Heist system: alert guard mobs when they take damage
+			GuardBuff guardBuff = buff(GuardBuff.class);
+			if (guardBuff != null) {
+				guardBuff.alert();
 			}
 		}
 		

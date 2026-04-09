@@ -37,8 +37,12 @@ public class Bestiary {
 		return mobs;
 	}
 	
-	//returns a rotation of standard mobs, unshuffled.
 	private static ArrayList<Class<? extends Mob>> standardMobRotation( int depth ){
+		// Remap new heist biomes (26-50) to caves limits (11-15) for testing
+		if (depth >= 26 && depth <= 50) {
+			depth = 11 + ((depth - 26) % 5);
+		}
+		
 		switch(depth){
 			
 			// Sewers
@@ -183,6 +187,10 @@ public class Bestiary {
 	
 	//has a chance to add a rarely spawned mobs to the rotation
 	public static void addRareMobs( int depth, ArrayList<Class<?extends Mob>> rotation ){
+		// Remap new heist biomes (26-50) to caves limits (11-15) for testing
+		if (depth >= 26 && depth <= 50) {
+			depth = 11 + ((depth - 26) % 5);
+		}
 		
 		switch (depth){
 			

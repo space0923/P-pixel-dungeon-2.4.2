@@ -35,6 +35,8 @@ public class Gloves extends MeleeWeapon {
 
 		tier = 10;
 		DLY = 0.5f;
+
+		silenced = true; // Silent fist weapons
 		
 		bones = false;
 	}

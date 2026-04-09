@@ -50,5 +50,10 @@ public class AlarmTrap extends Trap {
 		}
 
 		Sample.INSTANCE.play( Assets.Sounds.ALERT );
+
+		// Heist system: trigger the alarm
+		if (Dungeon.heistManager != null) {
+			Dungeon.heistManager.triggerAlarm();
+		}
 	}
 }

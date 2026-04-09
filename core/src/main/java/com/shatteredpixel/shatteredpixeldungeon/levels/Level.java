@@ -32,10 +32,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SmokeScreen;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Web;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WellWater;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AssaultAlert;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeistManager;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
@@ -339,7 +341,10 @@ public abstract class Level implements Bundlable {
 	}
 
 	public void playLevelMusic(){
-		//do nothing by default
+		// Delegate to heist phase music system
+		if (Dungeon.heistManager != null) {
+			Dungeon.heistManager.playPhaseMusic();
+		}
 	}
 	
 	@Override
@@ -694,9 +699,27 @@ public abstract class Level implements Bundlable {
 		@Override
 		protected boolean act() {
 
-			if (Dungeon.level.mobCount() < Dungeon.level.mobLimit()) {
+			// Heist system: only spawn mobs during ASSAULT phase
+			if (Dungeon.heistManager != null && !Dungeon.heistManager.respawnerActive()) {
+				// Check shop presence each tick (position-based)
+				Dungeon.heistManager.checkShopPresence();
+				spend(Dungeon.level.respawnCooldown());
+				return true;
+			}
 
-				if (Dungeon.level.spawnMob(12)){
+			// Heist: check shop presence during assault too
+			if (Dungeon.heistManager != null) {
+				Dungeon.heistManager.checkShopPresence();
+			}
+
+			int limit = Dungeon.level.mobLimit();
+			if (Dungeon.heistManager != null && Dungeon.heistManager.respawnerActive()) {
+				limit = Integer.MAX_VALUE; // remove mob limit entirely during an assault
+			}
+
+			if (Dungeon.level.mobCount() < limit) {
+
+				if (Dungeon.level.spawnMob(12) || Dungeon.level.spawnMob(6)) {
 					spend(Dungeon.level.respawnCooldown());
 				} else {
 					//try again in 1 turn
@@ -746,6 +769,11 @@ public abstract class Level implements Bundlable {
 		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] < disLimit) && tries > 0);
 
 		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] >= disLimit) {
+			// Heist system: during ASSAULT, mobs spawn in HUNTING state with AssaultAlert
+			if (Dungeon.heistManager != null && Dungeon.heistManager.phase == HeistManager.Phase.ASSAULT) {
+				mob.state = mob.HUNTING;
+				Buff.affect(mob, AssaultAlert.class);
+			}
 			GameScene.add( mob );
 			if (!mob.buffs(ChampionEnemy.class).isEmpty()){
 				GLog.w(Messages.get(ChampionEnemy.class, "warn"));

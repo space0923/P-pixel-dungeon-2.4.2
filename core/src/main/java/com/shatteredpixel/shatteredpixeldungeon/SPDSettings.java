@@ -410,6 +410,26 @@ public class SPDSettings extends GameSettings {
 	public static boolean playMusicInBackground(){
 		return getBoolean( KEY_MUSIC_BG, true);
 	}
+
+	// Heist Track Mode: 0=BIOME (fixed per biome), 1=RANDOM (per biome), 2=SET (player choice)
+	public static final String KEY_HEIST_TRACK_MODE = "heist_track_mode";
+	public static final String KEY_HEIST_SET_TRACK  = "heist_set_track";
+
+	public static void heistTrackMode( int value ) {
+		put( KEY_HEIST_TRACK_MODE, value );
+	}
+
+	public static int heistTrackMode() {
+		return getInt( KEY_HEIST_TRACK_MODE, 0, 0, 2 );
+	}
+
+	public static void heistSetTrack( int value ) {
+		put( KEY_HEIST_SET_TRACK, value );
+	}
+
+	public static int heistSetTrack() {
+		return getInt( KEY_HEIST_SET_TRACK, 0 );
+	}
 	
 	//Languages
 	

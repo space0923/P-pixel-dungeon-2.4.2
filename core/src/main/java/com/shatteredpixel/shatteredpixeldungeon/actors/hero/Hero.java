@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AnkhInvulnerability;
@@ -178,7 +179,7 @@ public class Hero extends Char {
 		alignment = Alignment.ALLY;
 	}
 	
-	public static final int MAX_LEVEL = 50;
+	public static final int MAX_LEVEL = 100;
 
 	public static final int STARTING_STR = 28;
 	
@@ -213,7 +214,7 @@ public class Hero extends Char {
 	public int lvl = 1;
 	public int exp = 0;
 	
-	public int HTBoost = 0;
+	public int HTBoost = pointsInTalent(Talent.PROVOKED_ANGER) * 10;
 	
 	private ArrayList<Mob> visibleEnemies;
 
@@ -231,21 +232,23 @@ public class Hero extends Char {
 		
 		visibleEnemies = new ArrayList<>();
 	}
-	
+
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
-		
+		HT = 230 + HTBoost;
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
+
 		
 		if (buff(ElixirOfMight.HTBoost.class) != null){
 			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
-		
+
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
 		}
 		HP = Math.min(HP, HT);
+
 	}
 
 	public int STR() {

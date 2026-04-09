@@ -43,6 +43,13 @@ abstract public class KindOfWeapon extends EquipableItem {
 
 	protected String hitSound = Assets.Sounds.HIT;
 	protected float hitSoundPitch = 1f;
+
+	// Heist system: silenced weapons don't trigger alarms
+	protected boolean silenced = false;
+
+	public boolean isSilenced() {
+		return silenced;
+	}
 	
 	@Override
 	public void execute(Hero hero, String action) {
