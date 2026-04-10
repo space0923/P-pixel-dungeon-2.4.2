@@ -9,7 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class Bernetti9 extends GunWeapon {
 
 	{
-		image = ItemSpriteSheet.WORN_SHORTSWORD;
+		image = ItemSpriteSheet.WORN_SHORTSWORD; // Placeholder
 		hitSound = Assets.Sounds.HIT_Chimano88; // Reusing Chimano88 sound for Bernetti
 		hitSoundPitch = 1f;
 
