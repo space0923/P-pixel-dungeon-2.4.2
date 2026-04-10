@@ -1,3 +1,3 @@
 # Payday Pixel Dungeon
 
-Finding The Payday In The Dungeon
+Finding Payday In The Dungeon
