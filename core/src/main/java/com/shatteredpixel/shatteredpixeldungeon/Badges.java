@@ -705,20 +705,20 @@ public class Badges {
 
 	private static LinkedHashMap<HeroClass, Badge> firstBossClassBadges = new LinkedHashMap<>();
 	static {
-		firstBossClassBadges.put(HeroClass.WARRIOR, Badge.BOSS_SLAIN_1_WARRIOR);
-		firstBossClassBadges.put(HeroClass.MAGE, Badge.BOSS_SLAIN_1_MAGE);
-		firstBossClassBadges.put(HeroClass.ROGUE, Badge.BOSS_SLAIN_1_ROGUE);
-		firstBossClassBadges.put(HeroClass.HUNTRESS, Badge.BOSS_SLAIN_1_HUNTRESS);
-		firstBossClassBadges.put(HeroClass.DUELIST, Badge.BOSS_SLAIN_1_DUELIST);
+		firstBossClassBadges.put(HeroClass.CREW_CHIEF, Badge.BOSS_SLAIN_1_WARRIOR);
+		firstBossClassBadges.put(HeroClass.MUSCLE, Badge.BOSS_SLAIN_1_MAGE);
+		firstBossClassBadges.put(HeroClass.ARMORER, Badge.BOSS_SLAIN_1_ROGUE);
+		firstBossClassBadges.put(HeroClass.ROGUE, Badge.BOSS_SLAIN_1_HUNTRESS);
+		firstBossClassBadges.put(HeroClass.CROOK, Badge.BOSS_SLAIN_1_DUELIST);
 	}
 
 	private static LinkedHashMap<HeroClass, Badge> victoryClassBadges = new LinkedHashMap<>();
 	static {
-		victoryClassBadges.put(HeroClass.WARRIOR, Badge.VICTORY_WARRIOR);
-		victoryClassBadges.put(HeroClass.MAGE, Badge.VICTORY_MAGE);
-		victoryClassBadges.put(HeroClass.ROGUE, Badge.VICTORY_ROGUE);
-		victoryClassBadges.put(HeroClass.HUNTRESS, Badge.VICTORY_HUNTRESS);
-		victoryClassBadges.put(HeroClass.DUELIST, Badge.VICTORY_DUELIST);
+		victoryClassBadges.put(HeroClass.CREW_CHIEF, Badge.VICTORY_WARRIOR);
+		victoryClassBadges.put(HeroClass.MUSCLE, Badge.VICTORY_MAGE);
+		victoryClassBadges.put(HeroClass.ARMORER, Badge.VICTORY_ROGUE);
+		victoryClassBadges.put(HeroClass.ROGUE, Badge.VICTORY_HUNTRESS);
+		victoryClassBadges.put(HeroClass.CROOK, Badge.VICTORY_DUELIST);
 	}
 
 	private static LinkedHashMap<HeroSubClass, Badge> thirdBossSubclassBadges = new LinkedHashMap<>();
@@ -837,19 +837,19 @@ public class Badges {
 		
 		Badge badge = null;
 		switch (Dungeon.hero.heroClass) {
-			case WARRIOR:
+			case CREW_CHIEF:
 				badge = Badge.MASTERY_WARRIOR;
 				break;
-			case MAGE:
+			case MUSCLE:
 				badge = Badge.MASTERY_MAGE;
 				break;
-			case ROGUE:
+			case ARMORER:
 				badge = Badge.MASTERY_ROGUE;
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				badge = Badge.MASTERY_HUNTRESS;
 				break;
-			case DUELIST:
+			case CROOK:
 				badge = Badge.MASTERY_DUELIST;
 				break;
 		}

@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
@@ -125,6 +126,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfCha
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -156,6 +159,10 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.DominatedBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.JokerAllyBuff;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
@@ -187,7 +194,7 @@ public class Hero extends Char {
 	private static final float TIME_TO_SEARCH	    = 2f;
 	private static final float HUNGER_FOR_SEARCH	= 6f;
 	
-	public HeroClass heroClass = HeroClass.ROGUE;
+	public HeroClass heroClass = HeroClass.ARMORER;
 	public HeroSubClass subClass = HeroSubClass.NONE;
 	public ArmorAbility armorAbility = null;
 	public ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
@@ -239,7 +246,11 @@ public class Hero extends Char {
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 
-		
+		// WOLF_PACK L2: additional +10% of HT
+		if (pointsInTalent(Talent.WOLF_PACK) == 2) {
+			HT = Math.round(HT * 1.10f);
+		}
+
 		if (buff(ElixirOfMight.HTBoost.class) != null){
 			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
@@ -458,7 +469,7 @@ public class Hero extends Char {
 			Buff.affect( this, Combo.class ).hit( enemy );
 		}
 
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
+		if (hit && heroClass == HeroClass.CROOK && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
@@ -613,7 +624,7 @@ public class Hero extends Char {
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
 		}
 
-		if (heroClass != HeroClass.DUELIST
+		if (heroClass != HeroClass.CROOK
 				&& hasTalent(Talent.WEAPON_RECHARGING)
 				&& (buff(Recharging.class) != null || buff(ArtifactRecharge.class) != null)){
 			dmg = Math.round(dmg * 1.025f + (.025f*pointsInTalent(Talent.WEAPON_RECHARGING)));
@@ -880,7 +891,7 @@ public class Hero extends Char {
 				//standing in high grass
 				(Dungeon.level.map[pos] == Terrain.HIGH_GRASS ||
 				//standing in furrowed grass and not huntress
-				(heroClass != HeroClass.HUNTRESS && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
+				(heroClass != HeroClass.ROGUE && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
 				//standing on a plant
 				Dungeon.level.plants.get(pos) != null);
 	}
@@ -889,6 +900,19 @@ public class Hero extends Char {
 
 		if (getCloser( action.dst )) {
 			canSelfTrample = false;
+
+			// MARATHON_MAN: count consecutive steps, grant Haste at threshold
+			if (hasTalent(Talent.MARATHON_MAN)) {
+				Talent.MarathonManTracker tracker = Buff.affect(this, Talent.MarathonManTracker.class);
+				tracker.countUp(1);
+				int threshold = pointsInTalent(Talent.MARATHON_MAN) >= 2 ? 6 : 8;
+				if (tracker.count() >= threshold) {
+					tracker.reset();
+					float hasteDur = pointsInTalent(Talent.MARATHON_MAN) >= 2 ? 4f : 3f;
+					Buff.prolong(this, Haste.class, hasteDur);
+				}
+			}
+
 			return true;
 
 		//Hero moves in place if there is grass to trample
@@ -898,17 +922,68 @@ public class Hero extends Char {
 			spendAndNext( 1 / speed() );
 			return false;
 		} else {
+			// Movement stopped — reset Marathon Man counter
+			Talent.MarathonManTracker tracker = buff(Talent.MarathonManTracker.class);
+			if (tracker != null) tracker.reset();
 			ready();
 			return false;
 		}
 	}
 	
 	private boolean actInteract( HeroAction.Interact action ) {
-		
+
 		Char ch = action.ch;
 
+		// JOKER talent: show context popup when interacting with a Dominated enemy
+		if (ch.isAlive() && ch.canInteract(this)
+				&& hasTalent(Talent.JOKER)
+				&& ch instanceof Mob
+				&& ch.buff(DominatedBuff.class) != null) {
+
+			final Mob mob = (Mob) ch;
+			final Hero hero = this;
+
+			// Count existing live Jokers
+			int jokerCap = pointsInTalent(Talent.JOKER); // L1 = 1, L2 = 2
+			int jokerCount = 0;
+			for (Char a : Actor.chars()) {
+				if (a instanceof Mob && a.buff(JokerAllyBuff.class) != null) {
+					jokerCount++;
+				}
+			}
+			final int finalJokerCount = jokerCount;
+			final int finalJokerCap = jokerCap;
+
+			ready();
+			sprite.turnTo(pos, ch.pos);
+
+			Game.runOnRenderThread(new Callback() {
+				@Override
+				public void call() {
+					GameScene.show(new WndOptions(
+							"Joker",
+							"Convert " + mob.name() + " into a loyal Joker?",
+							"Convert to Joker",
+							"Leave") {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								if (finalJokerCount >= finalJokerCap) {
+									GLog.w("You already have enough Jokers.");
+									return;
+								}
+								hero.spendAndNext(1f);
+								AllyBuff.affectAndLoot(mob, hero, JokerAllyBuff.class);
+							}
+						}
+					});
+				}
+			});
+			return false;
+		}
+
 		if (ch.isAlive() && ch.canInteract(this)) {
-			
+
 			ready();
 			sprite.turnTo( pos, ch.pos );
 			return ch.interact(this);
@@ -1314,10 +1389,53 @@ public class Hero extends Char {
 			ready();
 			return false;
 		}
+		
+		// PAYDAY HEIST OVERRIDE: Tapping an enemy with an active gun instantly shoots
+		GunWeapon gun = null;
+		boolean gunIsEquipped = false;
+		
+		if (belongings.weapon() instanceof GunWeapon) {
+			gun = (GunWeapon) belongings.weapon();
+			gunIsEquipped = true;
+		} else if (belongings.secondWep() instanceof GunWeapon) {
+			gun = (GunWeapon) belongings.secondWep();
+			gunIsEquipped = true;
+		} else {
+			for (int i = 0; i < QuickSlot.SIZE; i++) {
+				if (Dungeon.quickslot.getItem(i) instanceof GunWeapon) {
+					gun = (GunWeapon) Dungeon.quickslot.getItem(i);
+					break;
+				}
+			}
+		}
+		
+		if (gun != null && enemy.invisible == 0) {
+			if (Dungeon.level.distance(pos, enemy.pos) <= gun.maxRange) {
+				if (gun.curAmmo > 0) {
+					ready(); // Clear curAction so the actor loop doesn't fire multiple times!
+					gun.shoot(this, enemy.pos);
+					return false;
+				} else if (gunIsEquipped) {
+					if (gun.reserveAmmo > 0) {
+						ready();
+						gun.execute(this, GunWeapon.AC_RELOAD);
+					} else {
+						GLog.w("Click... Empty!");
+						ready();
+					}
+					return false;
+				}
+			} else if (gunIsEquipped) {
+				// If gun is equipped but target is out of range, explicitly block auto-walking
+				sprite.showStatus(CharSprite.NEUTRAL, "Out of range!");
+				ready();
+				return false;
+			}
+		}
 
 		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
 
-			if (heroClass != HeroClass.DUELIST
+			if (heroClass != HeroClass.CROOK
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
 					&& buff(Talent.AggressiveBarrierCooldown.class) == null
 					&& (HP / (float)HT) < 0.20f*(1+pointsInTalent(Talent.AGGRESSIVE_BARRIER))){
@@ -1475,6 +1593,22 @@ public class Hero extends Char {
 		if (buff(Talent.WarriorFoodImmunity.class) != null){
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg = Math.round(dmg*0.25f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  dmg = Math.round(dmg*0.00f);
+		}
+
+		// BRUTE_STRENGTH: L1 = always 5% DR; L2 = 10% DR when below 50% HP
+		if (hasTalent(Talent.BRUTE_STRENGTH)) {
+			int pts = pointsInTalent(Talent.BRUTE_STRENGTH);
+			boolean lowHP = HP < HT / 2;
+			if (pts == 2 && lowHP) {
+				dmg = Math.round(dmg * 0.90f);
+			} else {
+				dmg = Math.round(dmg * 0.95f);
+			}
+		}
+
+		// QUICK_FIX L2 DR buff
+		if (buff(Talent.QuickFixDRBuff.class) != null) {
+			dmg = buff(Talent.QuickFixDRBuff.class).absorbDamage(dmg);
 		}
 
 		int preHP = HP + shielding();
@@ -2119,7 +2253,7 @@ public class Hero extends Char {
 			Buff.affect( this, Combo.class ).hit( enemy );
 		}
 
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
+		if (hit && heroClass == HeroClass.CROOK && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
@@ -2216,7 +2350,7 @@ public class Hero extends Char {
 		boolean smthFound = false;
 
 		boolean circular = pointsInTalent(Talent.WIDE_SEARCH) == 1;
-		int distance = heroClass == HeroClass.ROGUE ? 2 : 1;
+		int distance = heroClass == HeroClass.ARMORER ? 2 : 1;
 		if (hasTalent(Talent.WIDE_SEARCH)) distance++;
 		
 		boolean foresight = buff(Foresight.class) != null;

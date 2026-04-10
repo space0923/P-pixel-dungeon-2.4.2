@@ -59,6 +59,7 @@ public class ItemSlot extends Button {
 	protected BitmapText extra;
 	protected Image      itemIcon;
 	protected BitmapText level;
+	protected BitmapText reserveStatus;
 	
 	private static final String TXT_STRENGTH	= ":%d";
 	private static final String TXT_TYPICAL_STR	= "%d?";
@@ -118,6 +119,9 @@ public class ItemSlot extends Button {
 		
 		level = new BitmapText( PixelScene.pixelFont);
 		add(level);
+
+		reserveStatus = new BitmapText( PixelScene.pixelFont);
+		add(reserveStatus);
 	}
 	
 	@Override
@@ -138,6 +142,18 @@ public class ItemSlot extends Button {
 			status.x = x + margin.left;
 			status.y = y + margin.top;
 			PixelScene.align(status);
+		}
+
+		if (reserveStatus != null) {
+			reserveStatus.measure();
+			if (reserveStatus.width > width - (margin.left + margin.right)){
+				reserveStatus.scale.set(PixelScene.align(0.8f));
+			} else {
+				reserveStatus.scale.set(1f);
+			}
+			reserveStatus.x = x + margin.left;
+			reserveStatus.y = status.y + status.height() + 1;
+			PixelScene.align(reserveStatus);
 		}
 		
 		if (extra != null) {
@@ -173,6 +189,7 @@ public class ItemSlot extends Button {
 		if (status != null)     status.alpha(value);
 		if (itemIcon != null)   itemIcon.alpha(value);
 		if (level != null)      level.alpha(value);
+		if (reserveStatus != null) reserveStatus.alpha(value);
 	}
 
 	public void clear(){
@@ -219,13 +236,21 @@ public class ItemSlot extends Button {
 		}
 
 		if (item == null){
-			status.visible = extra.visible = level.visible = false;
+			status.visible = extra.visible = level.visible = reserveStatus.visible = false;
 			return;
 		} else {
-			status.visible = extra.visible = level.visible = true;
+			status.visible = extra.visible = level.visible = reserveStatus.visible = true;
 		}
 
 		status.text( item.status() );
+
+		if (item instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon && item.levelKnown) {
+			reserveStatus.text("(" + ((com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon) item).reserveAmmo + ")");
+			reserveStatus.visible = true;
+		} else {
+			reserveStatus.visible = false;
+			reserveStatus.text(null);
+		}
 
 		//thrown weapons on their last use show quantity in orange, unless they are single-use
 		if (item instanceof MissileWeapon

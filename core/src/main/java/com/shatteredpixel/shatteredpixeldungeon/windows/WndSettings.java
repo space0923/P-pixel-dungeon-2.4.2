@@ -834,6 +834,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkUpdates;
 		CheckBox chkBetas;
 		CheckBox chkWifi;
+		RedButton btnDebugLevel;
 
 		@Override
 		protected void createChildren() {
@@ -892,6 +893,24 @@ public class WndSettings extends WndTabbed {
 				chkWifi.checked(SPDSettings.WiFi());
 				add(chkWifi);
 			}
+
+			// DEBUG: +50 levels button (only shown during an active game)
+			if (com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero != null) {
+				btnDebugLevel = new RedButton("[DEBUG] +50 Levels") {
+					@Override
+					protected void onClick() {
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero hero =
+								com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+						int startLevel = hero.lvl;
+						for (int i = 0; i < 50 && hero.lvl < com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero.MAX_LEVEL; i++) {
+							hero.earnExp(hero.maxExp() - hero.exp, WndSettings.class);
+						}
+						int gained = hero.lvl - startLevel;
+						com.shatteredpixel.shatteredpixeldungeon.utils.GLog.p("[DEBUG] +" + gained + " levels! Now level " + hero.lvl + ".");
+					}
+				};
+				add(btnDebugLevel);
+			}
 		}
 
 		@Override
@@ -922,6 +941,11 @@ public class WndSettings extends WndTabbed {
 			if (chkWifi != null){
 				chkWifi.setRect(0, pos + GAP, width, BTN_HEIGHT);
 				pos = chkWifi.bottom();
+			}
+
+			if (btnDebugLevel != null){
+				btnDebugLevel.setRect(0, pos + GAP*3, width, BTN_HEIGHT);
+				pos = btnDebugLevel.bottom();
 			}
 
 			height = pos;

@@ -85,7 +85,13 @@ public class Waterskin extends Item {
 		if (action.equals( AC_DRINK )) {
 
 			if (volume > 0) {
-				
+
+				// QUICK_FIX L2: drinking from a completely full waterskin grants 10% DR for 120 turns
+				if (hero.pointsInTalent(Talent.QUICK_FIX) == 2 && isFull()) {
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.prolong(
+							hero, Talent.QuickFixDRBuff.class, 120f);
+				}
+
 				float missingHealthPercent = 1f - (hero.HP / (float)hero.HT);
 
 				int curShield = 0;

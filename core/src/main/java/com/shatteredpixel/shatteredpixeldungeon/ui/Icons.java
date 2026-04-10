@@ -402,15 +402,15 @@ public enum Icons {
 	
 	public static Image get( HeroClass cl ) {
 		switch (cl) {
-			case WARRIOR:
+			case CREW_CHIEF:
 				return get( Icons.WARRIOR );
-			case MAGE:
+			case MUSCLE:
 				return get( Icons.MAGE );
-			case ROGUE:
+			case ARMORER:
 				return get( Icons.ROGUE );
-			case HUNTRESS:
+			case ROGUE:
 				return get( Icons.HUNTRESS );
-			case DUELIST:
+			case CROOK:
 				return get( Icons.DUELIST );
 			default:
 				return null;

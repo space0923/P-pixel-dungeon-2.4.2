@@ -215,7 +215,11 @@ public class GameScene extends PixelScene {
 			return;
 		}
 
-		Dungeon.level.playLevelMusic();
+		if (Dungeon.heistManager != null) {
+			Dungeon.heistManager.playPhaseMusic();
+		} else {
+			Dungeon.level.playLevelMusic();
+		}
 
 		SPDSettings.lastClass(Dungeon.hero.heroClass.ordinal());
 		

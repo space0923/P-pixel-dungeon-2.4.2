@@ -644,14 +644,14 @@ public abstract class Wand extends Item {
 							&& curWand.charger != null && curWand.charger.target == curUser){
 
 						//regular. If hero owns wand but it isn't in belongings it must be in the staff
-						if (curUser.heroClass == HeroClass.MAGE && !curUser.belongings.contains(curWand)){
+						if (curUser.heroClass == HeroClass.MUSCLE && !curUser.belongings.contains(curWand)){
 							//grants 3/5 shielding
 							int shieldToGive = 1 + 2 * Dungeon.hero.pointsInTalent(Talent.BACKUP_BARRIER);
 							Buff.affect(Dungeon.hero, Barrier.class).setShield(shieldToGive);
 							Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shieldToGive), FloatingText.SHIELDING);
 
 						//metamorphed. Triggers if wand is highest level hero has
-						} else if (curUser.heroClass != HeroClass.MAGE) {
+						} else if (curUser.heroClass != HeroClass.MUSCLE) {
 							boolean highest = true;
 							for (Item i : curUser.belongings.getAllItems(Wand.class)){
 								if (i.level() > curWand.level()){

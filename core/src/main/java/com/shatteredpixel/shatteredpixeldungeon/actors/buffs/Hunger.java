@@ -109,7 +109,12 @@ public class Hunger extends Buff implements Hero.Doom {
 
 			}
 			
-			spend( target.buff( Shadows.class ) == null ? STEP : STEP * 1.5f );
+			// UPPERS L1: reduce hunger accumulation rate by 25%
+			float hungerStep = STEP;
+			if (target instanceof Hero && ((Hero)target).hasTalent(com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.UPPERS)) {
+				hungerStep *= 0.75f;
+			}
+			spend( target.buff( Shadows.class ) == null ? hungerStep : hungerStep * 1.5f );
 
 		} else {
 

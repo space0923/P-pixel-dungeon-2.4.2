@@ -224,10 +224,11 @@ public class Shopkeeper extends NPC {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				String[] options = new String[2+ buybackItems.size()];
+				String[] options = new String[3+ buybackItems.size()];
 				int maxLen = PixelScene.landscape() ? 30 : 25;
 				int i = 0;
 				options[i++] = Messages.get(Shopkeeper.this, "sell");
+				options[i++] = "Deposit Offshore (" + Dungeon.gold + "G)";
 				options[i++] = Messages.get(Shopkeeper.this, "talk");
 				for (Item item : buybackItems){
 					options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
@@ -241,10 +242,18 @@ public class Shopkeeper extends NPC {
 						if (index == 0){
 							sell();
 						} else if (index == 1){
+							if (Dungeon.gold > 0) {
+								com.shatteredpixel.shatteredpixeldungeon.SPDSettings.addOffshoreAccount(Dungeon.gold);
+								GLog.p("Deposited " + Dungeon.gold + " gold to the Offshore Account!");
+								Dungeon.gold = 0;
+							} else {
+								GLog.w("You have no gold to deposit right now!");
+							}
+						} else if (index == 2){
 							GameScene.show(new WndTitledMessage(sprite(), Messages.titleCase(name()), chatText()));
-						} else if (index > 1){
+						} else if (index > 2){
 							GLog.i(Messages.get(Shopkeeper.this, "buyback"));
-							Item returned = buybackItems.remove(index-2);
+							Item returned = buybackItems.remove(index-3);
 							Dungeon.gold -= returned.value();
 							Statistics.goldCollected -= returned.value();
 							if (!returned.doPickUp(Dungeon.hero)){
@@ -255,8 +264,10 @@ public class Shopkeeper extends NPC {
 
 					@Override
 					protected boolean enabled(int index) {
-						if (index > 1){
-							return Dungeon.gold >= buybackItems.get(index-2).value();
+						if (index == 1) {
+							return Dungeon.gold > 0;
+						} else if (index > 2){
+							return Dungeon.gold >= buybackItems.get(index-3).value();
 						} else {
 							return super.enabled(index);
 						}
@@ -264,13 +275,13 @@ public class Shopkeeper extends NPC {
 
 					@Override
 					protected boolean hasIcon(int index) {
-						return index > 1;
+						return index > 2;
 					}
 
 					@Override
 					protected Image getIcon(int index) {
-						if (index > 1){
-							return new ItemSprite(buybackItems.get(index-2));
+						if (index > 2){
+							return new ItemSprite(buybackItems.get(index-3));
 						}
 						return null;
 					}

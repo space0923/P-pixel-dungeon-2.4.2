@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -72,6 +73,13 @@ public class Dewdrop extends Item {
 	}
 
 	public static boolean consumeDew(int quantity, Hero hero, boolean force){
+		// QUICK_FIX L1: each dewdrop heals a flat 6 HP on top of normal healing
+		if (hero.hasTalent(Talent.QUICK_FIX)) {
+			int quickHeal = 6 * quantity;
+			hero.HP = Math.min(hero.HP + quickHeal, hero.HT);
+			hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(quickHeal), FloatingText.HEALING);
+		}
+
 		//20 drops for a full heal
 		int heal = Math.round( hero.HT * 0.05f * quantity );
 

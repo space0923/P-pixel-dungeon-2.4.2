@@ -89,6 +89,10 @@ public enum Talent {
 	HEARTY_MEAL(0), VETERANS_INTUITION(1), PROVOKED_ANGER(2), IRON_WILL(3),
 	//Warrior T2
 	IRON_STOMACH(4), LIQUID_WILLPOWER(5), RUNIC_TRANSFERENCE(6), LETHAL_MOMENTUM(7), IMPROVISED_PROJECTILES(8),
+	//Crew Chief T1
+	BRUTE_STRENGTH(0), MARATHON_MAN(1), WOLF_PACK(2), TESTUDO(3),
+	//Crew Chief T2
+	UPPERS(4), QUICK_FIX(5), CONFIDENT(6), JOKER(7), MARKSMAN(8), AGGRESSIVE_RELOAD(27),
 	//Warrior T3
 	HOLD_FAST(9, 3), STRONGMAN(10, 3),
 	//Berserker T3
@@ -181,6 +185,32 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	public static class LethalMomentumTracker extends FlavourBuff{};
+
+	// Crew Chief talent buff classes
+
+	// QUICK_FIX L2: 10% damage reduction for 120 turns when drinking from a full waterskin
+	public static class QuickFixDRBuff extends FlavourBuff {
+		{ type = buffType.POSITIVE; }
+		@Override public int icon() { return BuffIndicator.ARMOR; }
+		@Override public void tintIcon(Image icon) { icon.hardlight(0.0f, 0.5f, 1.0f); }
+		@Override public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 120f)); }
+		public int absorbDamage(int dmg) { return Math.round(dmg * 0.90f); }
+	}
+
+	// AGGRESSIVE_RELOAD L2: 50% reload speed buff for 3 turns after double headshot kill (stub)
+	public static class AggressiveReloadBuff extends FlavourBuff {
+		{ type = buffType.POSITIVE; }
+		// TODO: implement when gun system is added
+	}
+
+	// MARATHON_MAN: Tracks consecutive steps. Grants Haste after 8 (L1) or 6 (L2) steps.
+	public static class MarathonManTracker extends CounterBuff {
+		{ type = buffType.POSITIVE; }
+		@Override public int icon() { return BuffIndicator.HASTE; }
+		@Override public void tintIcon(Image icon) { icon.hardlight(0.8f, 0.8f, 0f); }
+		public void reset() { countUp(-count()); }
+	}
+
 	public static class StrikingWaveTracker extends FlavourBuff{};
 	public static class WandPreservationCounter extends CounterBuff{{revivePersists = true;}};
 	public static class EmpoweredStrikeTracker extends FlavourBuff{
@@ -375,15 +405,15 @@ public enum Talent {
 			}
 			HeroClass cls = Dungeon.hero != null ? Dungeon.hero.heroClass : GamesInProgress.selectedClass;
 			switch (cls){
-				case WARRIOR: default:
+				case CREW_CHIEF: default:
 					return 26;
-				case MAGE:
+				case MUSCLE:
 					return 58;
-				case ROGUE:
+				case ARMORER:
 					return 90;
-				case HUNTRESS:
+				case ROGUE:
 					return 122;
-				case DUELIST:
+				case CROOK:
 					return 154;
 			}
 		} else {
@@ -418,8 +448,14 @@ public enum Talent {
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
 		//for metamorphosis
-		if (talent == IRON_WILL && hero.heroClass != HeroClass.WARRIOR){
+		if (talent == IRON_WILL && hero.heroClass != HeroClass.CREW_CHIEF){
 			Buff.affect(hero, BrokenSeal.WarriorShield.class);
+		}
+
+		// WOLF_PACK L1: flat +10 max HP per point
+		if (talent == WOLF_PACK) {
+			hero.HTBoost += 10;
+			hero.updateHT(true);
 		}
 
 		if (talent == VETERANS_INTUITION && hero.pointsInTalent(VETERANS_INTUITION) == 2){
@@ -448,7 +484,7 @@ public enum Talent {
 			Buff.affect(hero, Talent.ProtectiveShadowsTracker.class);
 		}
 
-		if (talent == LIGHT_CLOAK && hero.heroClass == HeroClass.ROGUE){
+		if (talent == LIGHT_CLOAK && hero.heroClass == HeroClass.ARMORER){
 			for (Item item : Dungeon.hero.belongings.backpack){
 				if (item instanceof CloakOfShadows){
 					if (!hero.belongings.lostInventory() || item.keptThroughLostInventory()) {
@@ -464,6 +500,10 @@ public enum Talent {
 
 		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER || talent == STRONGMAN){
 			Item.updateQuickslot();
+		}
+
+		if (talent == CONFIDENT) {
+			Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ConfidentAbility.class);
 		}
 
 		if (talent == UNENCUMBERED_SPIRIT && hero.pointsInTalent(talent) == 3){
@@ -525,7 +565,7 @@ public enum Talent {
 			Buff.affect( hero, PhysicalEmpower.class).set(3, 1 + hero.pointsInTalent(STRENGTHENING_MEAL));
 		}
 		if (hero.hasTalent(FOCUSED_MEAL)){
-			if (hero.heroClass == HeroClass.DUELIST){
+			if (hero.heroClass == HeroClass.CROOK){
 				//0.67/1 charge for the duelist
 				Buff.affect( hero, MeleeWeapon.Charger.class ).gainCharge((hero.pointsInTalent(FOCUSED_MEAL)+1)/3f);
 				ScrollOfRecharging.charge( hero );
@@ -533,6 +573,11 @@ public enum Talent {
 				// lvl/3 / lvl/2 bonus dmg on next hit for other classes
 				Buff.affect( hero, PhysicalEmpower.class).set(Math.round(hero.lvl / (4f - hero.pointsInTalent(FOCUSED_MEAL))), 1);
 			}
+		}
+		// UPPERS L2: eating any food unconditionally heals 10 HP
+		if (hero.hasTalent(UPPERS) && hero.pointsInTalent(UPPERS) == 2) {
+			hero.HP = Math.min(hero.HP + 10, hero.HT);
+			hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, "10", FloatingText.HEALING);
 		}
 	}
 
@@ -567,7 +612,7 @@ public enum Talent {
 
 	public static void onPotionUsed( Hero hero, int cell, float factor ){
 		if (hero.hasTalent(LIQUID_WILLPOWER)){
-			if (hero.heroClass == HeroClass.WARRIOR) {
+			if (hero.heroClass == HeroClass.CREW_CHIEF) {
 				BrokenSeal.WarriorShield shield = hero.buff(BrokenSeal.WarriorShield.class);
 				if (shield != null) {
 					// 50/75% of total shield
@@ -637,7 +682,7 @@ public enum Talent {
 
 	public static void onUpgradeScrollUsed( Hero hero ){
 		if (hero.hasTalent(INSCRIBED_POWER)){
-			if (hero.heroClass == HeroClass.MAGE) {
+			if (hero.heroClass == HeroClass.MUSCLE) {
 				MagesStaff staff = hero.belongings.getItem(MagesStaff.class);
 				if (staff != null) {
 					staff.gainCharge(2 + 2 * hero.pointsInTalent(INSCRIBED_POWER), true);
@@ -788,19 +833,19 @@ public enum Talent {
 
 		//tier 1
 		switch (cls){
-			case WARRIOR: default:
-				Collections.addAll(tierTalents, HEARTY_MEAL, VETERANS_INTUITION, PROVOKED_ANGER, IRON_WILL);
+			case CREW_CHIEF: default:
+				Collections.addAll(tierTalents, BRUTE_STRENGTH, MARATHON_MAN, WOLF_PACK, TESTUDO);
 				break;
-			case MAGE:
+			case MUSCLE:
 				Collections.addAll(tierTalents, EMPOWERING_MEAL, SCHOLARS_INTUITION, LINGERING_MAGIC, BACKUP_BARRIER);
 				break;
-			case ROGUE:
+			case ARMORER:
 				Collections.addAll(tierTalents, CACHED_RATIONS, THIEFS_INTUITION, SUCKER_PUNCH, PROTECTIVE_SHADOWS);
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				Collections.addAll(tierTalents, NATURES_BOUNTY, SURVIVALISTS_INTUITION, FOLLOWUP_STRIKE, NATURES_AID);
 				break;
-			case DUELIST:
+			case CROOK:
 				Collections.addAll(tierTalents, STRENGTHENING_MEAL, ADVENTURERS_INTUITION, PATIENT_STRIKE, AGGRESSIVE_BARRIER);
 				break;
 		}
@@ -814,19 +859,19 @@ public enum Talent {
 
 		//tier 2
 		switch (cls){
-			case WARRIOR: default:
-				Collections.addAll(tierTalents, IRON_STOMACH, LIQUID_WILLPOWER, RUNIC_TRANSFERENCE, LETHAL_MOMENTUM, IMPROVISED_PROJECTILES);
+			case CREW_CHIEF: default:
+				Collections.addAll(tierTalents, UPPERS, QUICK_FIX, CONFIDENT, JOKER, MARKSMAN, AGGRESSIVE_RELOAD);
 				break;
-			case MAGE:
+			case MUSCLE:
 				Collections.addAll(tierTalents, ENERGIZING_MEAL, INSCRIBED_POWER, WAND_PRESERVATION, ARCANE_VISION, SHIELD_BATTERY);
 				break;
-			case ROGUE:
+			case ARMORER:
 				Collections.addAll(tierTalents, MYSTICAL_MEAL, INSCRIBED_STEALTH, WIDE_SEARCH, SILENT_STEPS, ROGUES_FORESIGHT);
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				Collections.addAll(tierTalents, INVIGORATING_MEAL, LIQUID_NATURE, REJUVENATING_STEPS, HEIGHTENED_SENSES, DURABLE_PROJECTILES);
 				break;
-			case DUELIST:
+			case CROOK:
 				Collections.addAll(tierTalents, FOCUSED_MEAL, LIQUID_AGILITY, WEAPON_RECHARGING, LETHAL_HASTE, SWIFT_EQUIP);
 				break;
 		}
@@ -840,19 +885,19 @@ public enum Talent {
 
 		//tier 3
 		switch (cls){
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				Collections.addAll(tierTalents, HOLD_FAST, STRONGMAN);
 				break;
-			case MAGE:
+			case MUSCLE:
 				Collections.addAll(tierTalents, DESPERATE_POWER, ALLY_WARP);
 				break;
-			case ROGUE:
+			case ARMORER:
 				Collections.addAll(tierTalents, ENHANCED_RINGS, LIGHT_CLOAK);
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				Collections.addAll(tierTalents, POINT_BLANK, SEER_SHOT);
 				break;
-			case DUELIST:
+			case CROOK:
 				Collections.addAll(tierTalents, PRECISE_ASSAULT, DEADLY_FOLLOWUP);
 				break;
 		}

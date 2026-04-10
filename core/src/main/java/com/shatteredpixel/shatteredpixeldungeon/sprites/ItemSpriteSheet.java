@@ -148,6 +148,9 @@ public class ItemSpriteSheet {
 	public static final int BOW_FRAGMENT    = MISC_CONSUMABLE +19;
 	public static final int BROKEN_HILT     = MISC_CONSUMABLE +20;
 	public static final int TRINKET_CATA    = MISC_CONSUMABLE +21;
+	public static final int CABLETIE        = MISC_CONSUMABLE +22;
+	public static final int AMMO_BOX        = MISC_CONSUMABLE +23;
+	public static final int BULLET          = MISC_CONSUMABLE +24;
 
 	static{
 		assignItemRect(ANKH,            10, 16);
@@ -176,6 +179,9 @@ public class ItemSpriteSheet {
 		assignItemRect(BROKEN_HILT,      9,  9);
 
 		assignItemRect(TRINKET_CATA,    12, 11);
+		assignItemRect(CABLETIE,        16, 16);
+		assignItemRect(AMMO_BOX,        16, 16);
+		assignItemRect(BULLET,          7, 7);
 	}
 	
 	private static final int BOMBS          =                               xy(1, 6);   //16 slots

@@ -202,6 +202,14 @@ public class Assets {
 		public static final String HIT_STRONG = "sounds/hit_strong.mp3";
 		public static final String HIT_PARRY = "sounds/hit_parry.mp3";
 		public static final String HIT_ARROW = "sounds/hit_arrow.mp3";
+		public static final String HIT_ARMOR_1 = "sounds/hit_armor_1.mp3";
+		public static final String HIT_ARMOR_2 = "sounds/hit_armor_2.mp3";
+		public static final String HIT_ARMOR_3 = "sounds/hit_armor_3.mp3";
+		public static final String HIT_ARMOR_4 = "sounds/hit_armor_4.mp3";
+		public static final String HIT_ARMOR_5 = "sounds/hit_armor_5.mp3";
+		public static final String HIT_ARMOR_6 = "sounds/hit_armor_6.mp3";
+		public static final String[] HIT_ARMOR = { HIT_ARMOR_1, HIT_ARMOR_2, HIT_ARMOR_3, HIT_ARMOR_4, HIT_ARMOR_5, HIT_ARMOR_6 };
+		public static final String ARMOR_BREAK = "sounds/armor_break.mp3";
 		public static final String ATK_SPIRITBOW = "sounds/atk_spiritbow.mp3";
 		public static final String ATK_CROSSBOW = "sounds/atk_crossbow.mp3";
 		public static final String HEALTH_WARN = "sounds/health_warn.mp3";
@@ -256,7 +264,7 @@ public class Assets {
 				OPEN, UNLOCK, ITEM, DEWDROP, STEP, WATER, GRASS, TRAMPLE, STURDY,
 
 				HIT, MISS, HIT_Chimano88, HIT_SLASH, HIT_STAB, HIT_CRUSH, HIT_MAGIC, HIT_STRONG, HIT_PARRY,
-				HIT_ARROW, ATK_SPIRITBOW, ATK_CROSSBOW, HEALTH_WARN, HEALTH_CRITICAL,
+				HIT_ARROW, HIT_ARMOR_1, HIT_ARMOR_2, HIT_ARMOR_3, HIT_ARMOR_4, HIT_ARMOR_5, HIT_ARMOR_6, ARMOR_BREAK, ATK_SPIRITBOW, ATK_CROSSBOW, HEALTH_WARN, HEALTH_CRITICAL,
 
 				DESCEND, EAT, READ, LULLABY, DRINK, SHATTER, ZAP, LIGHTNING, LEVELUP, DEATH,
 				CHALLENGE, CURSED, TRAP, EVOKE, TOMB, ALERT, MELD, BOSS, BLAST, PLANT, RAY, BEACON,

@@ -830,7 +830,7 @@ public abstract class Mob extends Char {
 						&& Random.Float() < 0.34f + 0.33f* Dungeon.hero.pointsInTalent(Talent.LETHAL_MOMENTUM)){
 					Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 0f);
 				}
-				if (Dungeon.hero.heroClass != HeroClass.DUELIST
+				if (Dungeon.hero.heroClass != HeroClass.CROOK
 						&& Dungeon.hero.hasTalent(Talent.LETHAL_HASTE)
 						&& Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
 					Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
@@ -891,6 +891,11 @@ public abstract class Mob extends Char {
 				if (loot != null) {
 					Dungeon.level.drop(loot, pos).sprite.drop();
 				}
+			}
+			
+			// HEIST MOD: 20% flat chance to drop an ammo box, independent of other loot
+			if (Random.Float() < 0.20f) {
+				Dungeon.level.drop(new com.shatteredpixel.shatteredpixeldungeon.items.AmmoBox(), pos).sprite.drop();
 			}
 		}
 		

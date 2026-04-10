@@ -51,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.JokerAllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GuardBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeistManager;
@@ -407,6 +408,11 @@ public abstract class Char extends Actor {
 				dmg *= 1.5f;
 			}
 
+			// JOKER L2: +30% melee damage for converted Joker allies
+			if (buff(JokerAllyBuff.JokerEmpower.class) != null) {
+				dmg *= 1.3f;
+			}
+
 			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 				dmg *= buff.meleeDamageFactor();
 			}
@@ -453,7 +459,13 @@ public abstract class Char extends Actor {
 				effectiveDamage = attackProc(enemy, effectiveDamage);
 			}
 			if (visibleFight) {
-				if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
+				boolean muteHit = false;
+				if (enemy instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) {
+					if (enemy.shielding() > 0) {
+						muteHit = true;
+					}
+				}
+				if (!muteHit && (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f)))) {
 					hitSound(Random.Float(0.87f, 1.15f));
 				}
 			}
@@ -867,6 +879,10 @@ public abstract class Char extends Actor {
 			if (src instanceof Viscosity.DeferedDamage)                 icon = FloatingText.DEFERRED;
 			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
 			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
+
+			if (this instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero && (shielded > 0 || shielding() > 0)) {
+				icon = FloatingText.SHIELDING;
+			}
 
 			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
 		}

@@ -59,19 +59,19 @@ public class WndHeroInfo extends WndTabbed {
 
 		Image tabIcon;
 		switch (cl){
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
 				break;
-			case MAGE:
+			case MUSCLE:
 				tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
 				break;
-			case ROGUE:
+			case ARMORER:
 				tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
 				break;
-			case DUELIST:
+			case CROOK:
 				tabIcon = new ItemSprite(ItemSpriteSheet.RAPIER, null);
 				break;
 		}
@@ -171,29 +171,29 @@ public class WndHeroInfo extends WndTabbed {
 			}
 
 			switch (cls){
-				case WARRIOR: default:
+				case CREW_CHIEF: default:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
 							new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case MAGE:
+				case MUSCLE:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
 							new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case ROGUE:
+				case ARMORER:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
 							Icons.get(Icons.STAIRS),
 							new ItemSprite(ItemSpriteSheet.DAGGER),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case HUNTRESS:
+				case ROGUE:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
 							new Image(Assets.Environment.TILES_SEWERS, 32, 64, 16, 16),
 							new ItemSprite(ItemSpriteSheet.GLOVES),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case DUELIST:
+				case CROOK:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.RAPIER),
 							new ItemSprite(ItemSpriteSheet.WAR_HAMMER),
 							new ItemSprite(ItemSpriteSheet.THROWING_SPIKE),

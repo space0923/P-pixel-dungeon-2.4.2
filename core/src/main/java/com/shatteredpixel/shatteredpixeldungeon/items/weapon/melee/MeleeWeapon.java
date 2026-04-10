@@ -65,14 +65,14 @@ public class MeleeWeapon extends Weapon {
 	@Override
 	public void activate(Char ch) {
 		super.activate(ch);
-		if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.DUELIST){
+		if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.CROOK){
 			Buff.affect(ch, Charger.class);
 		}
 	}
 
 	@Override
 	public String defaultAction() {
-		if (Dungeon.hero != null && (Dungeon.hero.heroClass == HeroClass.DUELIST
+		if (Dungeon.hero != null && (Dungeon.hero.heroClass == HeroClass.CROOK
 			|| Dungeon.hero.hasTalent(Talent.SWIFT_EQUIP))){
 			return AC_ABILITY;
 		} else {
@@ -83,7 +83,7 @@ public class MeleeWeapon extends Weapon {
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
-		if (isEquipped(hero) && hero.heroClass == HeroClass.DUELIST){
+		if (isEquipped(hero) && hero.heroClass == HeroClass.CROOK){
 			actions.add(AC_ABILITY);
 		}
 		return actions;
@@ -109,13 +109,13 @@ public class MeleeWeapon extends Weapon {
 					if (hero.buff(Talent.SwiftEquipCooldown.class) == null
 						|| hero.buff(Talent.SwiftEquipCooldown.class).hasSecondUse()){
 						execute(hero, AC_EQUIP);
-					} else if (hero.heroClass == HeroClass.DUELIST) {
+					} else if (hero.heroClass == HeroClass.CROOK) {
 						GLog.w(Messages.get(this, "ability_need_equip"));
 					}
-				} else if (hero.heroClass == HeroClass.DUELIST) {
+				} else if (hero.heroClass == HeroClass.CROOK) {
 					GLog.w(Messages.get(this, "ability_need_equip"));
 				}
-			} else if (hero.heroClass != HeroClass.DUELIST){
+			} else if (hero.heroClass != HeroClass.CROOK){
 				//do nothing
 			} else if (STRReq() > hero.STR()){
 				GLog.w(Messages.get(this, "ability_low_str"));
@@ -175,7 +175,7 @@ public class MeleeWeapon extends Weapon {
 			charger.partialCharge++;
 		}
 
-		if (hero.heroClass == HeroClass.DUELIST
+		if (hero.heroClass == HeroClass.CROOK
 				&& hero.hasTalent(Talent.AGGRESSIVE_BARRIER)
 				&& (hero.HP / (float)hero.HT) <= 0.5f){
 			int shieldAmt = 1 + 2*hero.pointsInTalent(Talent.AGGRESSIVE_BARRIER);
@@ -249,15 +249,22 @@ public class MeleeWeapon extends Weapon {
 	}
 
 	public int tier;
+	public int baseDamage = 0;
 
 	@Override
 	public int min(int lvl) {
+		if (baseDamage > 0) {
+			return baseDamage + (lvl * (tier + 1));
+		}
 		return  tier +  //base
 				lvl;    //level scaling
 	}
 
 	@Override
 	public int max(int lvl) {
+		if (baseDamage > 0) {
+			return baseDamage + (lvl * (tier + 1));
+		}
 		return  5*(tier+1) +    //base
 				lvl*(tier+1);   //level scaling
 	}
@@ -298,7 +305,7 @@ public class MeleeWeapon extends Weapon {
 				&& ((Hero) owner).hasTalent(Talent.PRECISE_ASSAULT)
 				//does not trigger on ability attacks
 				&& ((Hero) owner).belongings.abilityWeapon != this) {
-			if (((Hero) owner).heroClass != HeroClass.DUELIST) {
+			if (((Hero) owner).heroClass != HeroClass.CROOK) {
 				//persistent +10%/20%/30% ACC for other heroes
 				ACC *= 1f + 0.1f * ((Hero) owner).pointsInTalent(Talent.PRECISE_ASSAULT);
 			} else if (this instanceof Flail && owner.buff(Flail.SpinAbilityTracker.class) != null){
@@ -315,12 +322,22 @@ public class MeleeWeapon extends Weapon {
 
 	@Override
 	public int damageRoll(Char owner) {
-		int damage = augment.damageFactor(super.damageRoll( owner ));
+		// Calculate fixed base damage
+		int fixedBaseDamage;
+		if (baseDamage > 0) {
+			fixedBaseDamage = baseDamage + (buffedLvl() * (tier + 1));
+		} else {
+			// Fallback to legacy exact average if baseDamage not explicitly set
+			fixedBaseDamage = (min() + max()) / 2; 
+		}
+		
+		int damage = augment.damageFactor(fixedBaseDamage);
 
 		if (owner instanceof Hero) {
 			int exStr = ((Hero)owner).STR() - STRReq();
 			if (exStr > 0) {
-				damage += Char.combatRoll( 0, exStr );
+				// Fixed extra damage from strength
+				damage += exStr; 
 			}
 		}
 		return damage;
@@ -379,7 +396,7 @@ public class MeleeWeapon extends Weapon {
 		}
 
 		//the mage's staff has no ability as it can only be gained by the mage
-		if (Dungeon.hero.heroClass == HeroClass.DUELIST && !(this instanceof MagesStaff)){
+		if (Dungeon.hero.heroClass == HeroClass.CROOK && !(this instanceof MagesStaff)){
 			info += "\n\n" + abilityInfo();
 		}
 		

@@ -99,19 +99,19 @@ abstract public class ClassArmor extends Armor {
 		ClassArmor classArmor = null;
 		
 		switch (owner.heroClass) {
-			case WARRIOR:
+			case CREW_CHIEF:
 				classArmor = new WarriorArmor();
 				break;
-			case ROGUE:
+			case ARMORER:
 				classArmor = new RogueArmor();
 				break;
-			case MAGE:
+			case MUSCLE:
 				classArmor = new MageArmor();
 				break;
-			case HUNTRESS:
+			case ROGUE:
 				classArmor = new HuntressArmor();
 				break;
-			case DUELIST:
+			case CROOK:
 				classArmor = new DuelistArmor();
 				break;
 		}

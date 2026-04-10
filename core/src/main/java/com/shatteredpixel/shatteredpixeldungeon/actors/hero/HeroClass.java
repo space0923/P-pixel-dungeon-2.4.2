@@ -44,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.En
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
+import com.shatteredpixel.shatteredpixeldungeon.items.CableTie;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
@@ -68,6 +69,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rapier;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bernetti9;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingSpike;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
@@ -76,11 +78,11 @@ import com.watabou.utils.DeviceCompat;
 
 public enum HeroClass {
 
-	WARRIOR( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR ),
-	MAGE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
-	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
-	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
-	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
+	CREW_CHIEF( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR ),
+	MUSCLE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
+	ARMORER( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
+	ROGUE( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
+	CROOK( HeroSubClass.CHAMPION, HeroSubClass.MONK );
 
 	private HeroSubClass[] subClasses;
 
@@ -108,23 +110,23 @@ public enum HeroClass {
 		new ScrollOfIdentify().identify();
 
 		switch (this) {
-			case WARRIOR:
-				initWarrior( hero );
+			case CREW_CHIEF:
+				initCrewChief( hero );
 				break;
 
-			case MAGE:
+			case MUSCLE:
 				initMage( hero );
 				break;
 
-			case ROGUE:
+			case ARMORER:
 				initRogue( hero );
 				break;
 
-			case HUNTRESS:
+			case ROGUE:
 				initHuntress( hero );
 				break;
 
-			case DUELIST:
+			case CROOK:
 				initDuelist( hero );
 				break;
 		}
@@ -138,36 +140,35 @@ public enum HeroClass {
 			}
 		}
 
+		if (hero.belongings.armor != null) {
+			hero.belongings.armor.activate(hero);
+		}
 	}
 
 	public Badges.Badge masteryBadge() {
 		switch (this) {
-			case WARRIOR:
+			case CREW_CHIEF:
 				return Badges.Badge.MASTERY_WARRIOR;
-			case MAGE:
+			case MUSCLE:
 				return Badges.Badge.MASTERY_MAGE;
-			case ROGUE:
+			case ARMORER:
 				return Badges.Badge.MASTERY_ROGUE;
-			case HUNTRESS:
+			case ROGUE:
 				return Badges.Badge.MASTERY_HUNTRESS;
-			case DUELIST:
+			case CROOK:
 				return Badges.Badge.MASTERY_DUELIST;
 		}
 		return null;
 	}
 
-	private static void initWarrior( Hero hero ) {
-		(hero.belongings.weapon = new WornShortsword()).identify();
-		ThrowingStone stones = new ThrowingStone();
-		stones.quantity(3).collect();
-		Dungeon.quickslot.setSlot(0, stones);
-
-		if (hero.belongings.armor != null){
-			hero.belongings.armor.affixSeal(new BrokenSeal());
-		}
+	private static void initCrewChief( Hero hero ) {
+		(hero.belongings.weapon = new Bernetti9()).identify();
+		CableTie ties = new CableTie();
+		ties.quantity(6).collect();
+		Dungeon.quickslot.setSlot(0, ties);
 
 		new PotionOfHealing().identify();
-		new ScrollOfRage().identify();
+		new ScrollOfMirrorImage().identify();
 	}
 
 	private static void initMage( Hero hero ) {
@@ -251,45 +252,45 @@ public enum HeroClass {
 
 	public ArmorAbility[] armorAbilities(){
 		switch (this) {
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Endure()};
-			case MAGE:
+			case MUSCLE:
 				return new ArmorAbility[]{new ElementalBlast(), new WildMagic(), new WarpBeacon()};
-			case ROGUE:
+			case ARMORER:
 				return new ArmorAbility[]{new SmokeBomb(), new DeathMark(), new ShadowClone()};
-			case HUNTRESS:
+			case ROGUE:
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
-			case DUELIST:
+			case CROOK:
 				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
 		}
 	}
 
 	public String spritesheet() {
 		switch (this) {
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				return Assets.Sprites.WARRIOR;
-			case MAGE:
+			case MUSCLE:
 				return Assets.Sprites.MAGE;
-			case ROGUE:
+			case ARMORER:
 				return Assets.Sprites.ROGUE;
-			case HUNTRESS:
+			case ROGUE:
 				return Assets.Sprites.HUNTRESS;
-			case DUELIST:
+			case CROOK:
 				return Assets.Sprites.DUELIST;
 		}
 	}
 
 	public String splashArt(){
 		switch (this) {
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				return Assets.Splashes.WARRIOR;
-			case MAGE:
+			case MUSCLE:
 				return Assets.Splashes.MAGE;
-			case ROGUE:
+			case ARMORER:
 				return Assets.Splashes.ROGUE;
-			case HUNTRESS:
+			case ROGUE:
 				return Assets.Splashes.HUNTRESS;
-			case DUELIST:
+			case CROOK:
 				return Assets.Splashes.DUELIST;
 		}
 	}
@@ -299,15 +300,15 @@ public enum HeroClass {
 		if (DeviceCompat.isDebug()) return true;
 
 		switch (this){
-			case WARRIOR: default:
+			case CREW_CHIEF: default:
 				return true;
-			case MAGE:
+			case MUSCLE:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_MAGE);
-			case ROGUE:
+			case ARMORER:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_ROGUE);
-			case HUNTRESS:
+			case ROGUE:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
-			case DUELIST:
+			case CROOK:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_DUELIST);
 		}
 	}

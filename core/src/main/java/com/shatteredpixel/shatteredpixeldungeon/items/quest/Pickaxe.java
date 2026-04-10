@@ -179,7 +179,7 @@ public class Pickaxe extends MeleeWeapon {
 
 	@Override
 	public String defaultAction() {
-		if (Dungeon.hero.heroClass == HeroClass.DUELIST && isEquipped(Dungeon.hero)){
+		if (Dungeon.hero.heroClass == HeroClass.CROOK && isEquipped(Dungeon.hero)){
 			return AC_ABILITY;
 		} else if (Blacksmith.Quest.oldMiningQuest()) {
 			return AC_MINE;

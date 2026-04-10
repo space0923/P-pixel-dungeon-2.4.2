@@ -473,4 +473,18 @@ public class SPDSettings extends GameSettings {
 	public static boolean windowMaximized(){
 		return getBoolean( KEY_WINDOW_MAXIMIZED, false );
 	}
+
+	public static final String KEY_OFFSHORE_ACCOUNT = "offshore_account";
+
+	public static void offshoreAccount(int value) {
+		put( KEY_OFFSHORE_ACCOUNT, value );
+	}
+
+	public static int offshoreAccount() {
+		return getInt( KEY_OFFSHORE_ACCOUNT, 0 );
+	}
+
+	public static void addOffshoreAccount(int amount) {
+		offshoreAccount(offshoreAccount() + amount);
+	}
 }
