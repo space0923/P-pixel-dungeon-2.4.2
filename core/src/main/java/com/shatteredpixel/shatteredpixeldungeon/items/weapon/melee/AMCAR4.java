@@ -11,8 +11,8 @@ public class AMCAR4 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.ASSAULT_RIFLE;
-		tier = 10;
-		baseDamage = 42;
+		tier = 12;
+		baseDamage = 45;
 		ACC = 1.0f;
 		accuracyFalloff = 0.04f;
 		
@@ -22,9 +22,10 @@ public class AMCAR4 extends GunWeapon {
 		reserveAmmo = maxReserveAmmo;
 		
 		burstCount = 3;
+		RPM = 600;
 		
 		DLY = 1.0f;
-		reloadDelay = 1.0f;
+		reloadDelay = 2.0f;
 
 		bones = false;
 	}

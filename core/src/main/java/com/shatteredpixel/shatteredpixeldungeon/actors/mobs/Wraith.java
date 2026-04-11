@@ -44,7 +44,7 @@ public class Wraith extends Mob {
 	{
 		spriteClass = WraithSprite.class;
 		
-		HP = HT = 40;
+		HP = HT = 100;
 		EXP = 0;
 
 		maxLvl = -2;

@@ -88,4 +88,11 @@ public class HeroAction {
 			this.target = target;
 		}
 	}
+	
+	public static class Reload extends HeroAction {
+		public com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon gun;
+		public Reload( com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon gun ) {
+			this.gun = gun;
+		}
+	}
 }

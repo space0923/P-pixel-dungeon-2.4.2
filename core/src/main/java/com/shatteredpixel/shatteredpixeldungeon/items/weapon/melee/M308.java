@@ -11,20 +11,20 @@ public class M308 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.MARKSMAN_RIFLE;
-		tier = 10;
-		baseDamage = 85;
-		ACC = 1.6f;
-		accuracyFalloff = 0.02f;
+		tier = 14;
+		baseDamage = 160;
+		ACC = 1.4f;
+		accuracyFalloff = 0.1f;
 		
 		maxAmmo = 10;
 		curAmmo = maxAmmo;
-		maxReserveAmmo = 30;
+		maxReserveAmmo = 70;
 		reserveAmmo = maxReserveAmmo;
 		
 		burstCount = 1;
 		
 		DLY = 1.0f;
-		reloadDelay = 1.0f;
+		reloadDelay = 2.0f;
 
 		bones = false;
 	}

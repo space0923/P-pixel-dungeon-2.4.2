@@ -701,15 +701,8 @@ public abstract class Level implements Bundlable {
 
 			// Heist system: only spawn mobs during ASSAULT phase
 			if (Dungeon.heistManager != null && !Dungeon.heistManager.respawnerActive()) {
-				// Check shop presence each tick (position-based)
-				Dungeon.heistManager.checkShopPresence();
 				spend(Dungeon.level.respawnCooldown());
 				return true;
-			}
-
-			// Heist: check shop presence during assault too
-			if (Dungeon.heistManager != null) {
-				Dungeon.heistManager.checkShopPresence();
 			}
 
 			int limit = Dungeon.level.mobLimit();

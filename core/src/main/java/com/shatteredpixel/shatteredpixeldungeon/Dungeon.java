@@ -361,6 +361,9 @@ public class Dungeon {
 					case 51:
 						level = new LastLevel();
 						break;
+					case 99:
+						level = new com.shatteredpixel.shatteredpixeldungeon.levels.DebugLevel();
+						break;
 					default:
 						level = new DeadEndLevel();
 				}
@@ -497,7 +500,7 @@ public class Dungeon {
 
 		// Heist system: check for biome reset on floor change
 		if (heistManager != null) {
-			heistManager.onFloorChange(oldDepth, depth);
+			heistManager.onFloorChange();
 		}
 
 		Actor.init();

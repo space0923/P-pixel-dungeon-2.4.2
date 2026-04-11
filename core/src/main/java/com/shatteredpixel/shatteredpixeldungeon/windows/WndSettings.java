@@ -834,6 +834,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkUpdates;
 		CheckBox chkBetas;
 		CheckBox chkWifi;
+		RedButton btnFiftyLevels;
 		RedButton btnDebugLevel;
 
 		@Override
@@ -896,7 +897,7 @@ public class WndSettings extends WndTabbed {
 
 			// DEBUG: +50 levels button (only shown during an active game)
 			if (com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero != null) {
-				btnDebugLevel = new RedButton("[DEBUG] +50 Levels") {
+				btnFiftyLevels = new RedButton("[DEBUG] +50 Levels") {
 					@Override
 					protected void onClick() {
 						com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero hero =
@@ -907,6 +908,20 @@ public class WndSettings extends WndTabbed {
 						}
 						int gained = hero.lvl - startLevel;
 						com.shatteredpixel.shatteredpixeldungeon.utils.GLog.p("[DEBUG] +" + gained + " levels! Now level " + hero.lvl + ".");
+					}
+				};
+				add(btnFiftyLevels);
+
+				btnDebugLevel = new RedButton("[DEBUG] Weapon Island") {
+					@Override
+					protected void onClick() {
+						com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.cancel();
+						try {
+							com.shatteredpixel.shatteredpixeldungeon.Dungeon.saveAll();
+						} catch (java.io.IOException e) {}
+						com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene.mode = com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene.Mode.DESCEND;
+						com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene.curTransition = new com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition(com.shatteredpixel.shatteredpixeldungeon.Dungeon.level, com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero.pos, com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition.Type.REGULAR_EXIT, 99, 0, com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition.Type.REGULAR_ENTRANCE);
+						com.watabou.noosa.Game.switchScene(com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene.class);
 					}
 				};
 				add(btnDebugLevel);
@@ -943,8 +958,13 @@ public class WndSettings extends WndTabbed {
 				pos = chkWifi.bottom();
 			}
 
+			if (btnFiftyLevels != null){
+				btnFiftyLevels.setRect(0, pos + GAP*3, width, BTN_HEIGHT);
+				pos = btnFiftyLevels.bottom();
+			}
+
 			if (btnDebugLevel != null){
-				btnDebugLevel.setRect(0, pos + GAP*3, width, BTN_HEIGHT);
+				btnDebugLevel.setRect(0, pos + GAP, width, BTN_HEIGHT);
 				pos = btnDebugLevel.bottom();
 			}
 

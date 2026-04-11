@@ -62,6 +62,9 @@ public class HeistManager implements Bundlable {
 	private static final float FADE_MIN = 45f;
 	private static final float FADE_MAX = 80f;
 
+	private static final String BIOME_IDX = "biome_idx";
+	public int currentBiome = 0;
+
 	// Returns the current biome index (0-4) for the given depth
 	public static int biomeFor(int depth) {
 		return (depth - 1) / 5;
@@ -72,6 +75,7 @@ public class HeistManager implements Bundlable {
 	 * based on the current TrackMode setting.
 	 */
 	private int resolveTrackIdx(int biome) {
+		if (Assets.Music.HEIST_TRACKS == null) return 0;
 		int trackCount = Assets.Music.HEIST_TRACKS.length;
 		if (trackCount == 0) return 0;
 
@@ -94,17 +98,20 @@ public class HeistManager implements Bundlable {
 	 * Resolves the track for the first biome (depth 1, biome 0).
 	 */
 	public void init() {
-		currentTrackIdx = resolveTrackIdx(0);
+		currentBiome = 0;
+		currentTrackIdx = resolveTrackIdx(currentBiome);
 	}
 
 	// Called when entering a new floor — resets if new biome
-	public void onFloorChange(int oldDepth, int newDepth) {
-		if (biomeFor(oldDepth) != biomeFor(newDepth)) {
+	public void onFloorChange() {
+		int newBiome = biomeFor(Dungeon.depth);
+		if (currentBiome != newBiome) {
 			phase = Phase.STEALTH;
 			phaseTimer = 0;
 			assaultWaveCount = 0;
 			// Resolve track for the new biome
-			currentTrackIdx = resolveTrackIdx(biomeFor(newDepth));
+			currentTrackIdx = resolveTrackIdx(newBiome);
+			currentBiome = newBiome;
 		}
 		// Reset shop state on floor change
 		inShop = false;
@@ -227,17 +234,22 @@ public class HeistManager implements Bundlable {
 		if (trackCount == 0) return;
 
 		int idx = Math.min(currentTrackIdx, trackCount - 1);
-		String track = Assets.Music.HEIST_TRACKS[idx];
-		String intro = Assets.Music.HEIST_MUSIC_DIR + track + "/" + phaseName + "_intro.ogg";
-		String loop  = Assets.Music.HEIST_MUSIC_DIR + track + "/" + phaseName + "_loop.ogg";
-		Music.INSTANCE.playWithIntro(intro, loop);
+		final String track = Assets.Music.HEIST_TRACKS[idx];
+		final String intro = Assets.Music.HEIST_MUSIC_DIR + track + "/" + phaseName + "_intro.ogg";
+		final String loop  = Assets.Music.HEIST_MUSIC_DIR + track + "/" + phaseName + "_loop.ogg";
+		com.watabou.noosa.Game.runOnRenderThread(new com.watabou.utils.Callback() {
+			@Override
+			public void call() {
+				Music.INSTANCE.playWithIntro(intro, loop);
+			}
+		});
 	}
 
 	// Check if hero is in a shop room — handle music transitions
 	public void checkShopPresence() {
 		boolean wasInShop = inShop;
 
-		if (Dungeon.level instanceof RegularLevel) {
+		if (Dungeon.level instanceof RegularLevel && Dungeon.hero != null) {
 			Room room = ((RegularLevel) Dungeon.level).room(Dungeon.hero.pos);
 			inShop = (room instanceof ShopRoom);
 		} else {
@@ -246,9 +258,14 @@ public class HeistManager implements Bundlable {
 
 		if (inShop && !wasInShop) {
 			// Entered shop — play shared shop intro+loop
-			String intro = Assets.Music.HEIST_MUSIC_DIR + "shop_intro.ogg";
-			String loop  = Assets.Music.HEIST_MUSIC_DIR + "shop_loop.ogg";
-			Music.INSTANCE.playWithIntro(intro, loop);
+			final String intro = Assets.Music.HEIST_MUSIC_DIR + "shop_intro.ogg";
+			final String loop  = Assets.Music.HEIST_MUSIC_DIR + "shop_loop.ogg";
+			com.watabou.noosa.Game.runOnRenderThread(new com.watabou.utils.Callback() {
+				@Override
+				public void call() {
+					Music.INSTANCE.playWithIntro(intro, loop);
+				}
+			});
 		} else if (!inShop && wasInShop) {
 			// Left shop — resume current phase music
 			playPhaseMusic();
@@ -294,14 +311,17 @@ public class HeistManager implements Bundlable {
 		bundle.put(WAVE_COUNT, assaultWaveCount);
 		bundle.put(IN_SHOP, inShop);
 		bundle.put(TRACK_IDX, currentTrackIdx);
+		bundle.put(BIOME_IDX, currentBiome);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		phase = bundle.getEnum(PHASE, Phase.class);
+		if (phase == null) phase = Phase.STEALTH;
 		phaseTimer = bundle.getFloat(PHASE_TIMER);
 		assaultWaveCount = bundle.getInt(WAVE_COUNT);
 		inShop = bundle.getBoolean(IN_SHOP);
 		currentTrackIdx = bundle.getInt(TRACK_IDX);
+		currentBiome = bundle.getInt(BIOME_IDX);
 	}
 }

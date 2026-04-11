@@ -838,6 +838,9 @@ public class Hero extends Char {
 			} else if (curAction instanceof HeroAction.Alchemy) {
 				actResult = actAlchemy( (HeroAction.Alchemy)curAction );
 				
+			} else if (curAction instanceof HeroAction.Reload) {
+				actResult = actReload( (HeroAction.Reload)curAction );
+				
 			} else {
 				actResult = false;
 			}
@@ -1054,6 +1057,20 @@ public class Hero extends Char {
 			ready();
 			return false;
 		}
+	}
+
+	private boolean actReload( HeroAction.Reload action ) {
+		if ((belongings.weapon() != action.gun && belongings.secondWep() != action.gun) 
+				|| action.gun.curAmmo >= action.gun.maxAmmo || action.gun.reserveAmmo <= 0) {
+			
+			if (curAction == action) curAction = null;
+			ready();
+			return false;
+		}
+		
+		if (curAction == action) curAction = null; // Clear it so the weapon can re-queue!
+		action.gun.execute(this, com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon.AC_RELOAD);
+		return false;
 	}
 
 	//used to keep track if the wait/pickup action was used
@@ -1410,25 +1427,18 @@ public class Hero extends Char {
 		}
 		
 		if (gun != null && enemy.invisible == 0) {
-			if (Dungeon.level.distance(pos, enemy.pos) <= gun.maxRange) {
-				if (gun.curAmmo > 0) {
-					ready(); // Clear curAction so the actor loop doesn't fire multiple times!
-					gun.shoot(this, enemy.pos);
-					return false;
-				} else if (gunIsEquipped) {
-					if (gun.reserveAmmo > 0) {
-						ready();
-						gun.execute(this, GunWeapon.AC_RELOAD);
-					} else {
-						GLog.w("Click... Empty!");
-						ready();
-					}
-					return false;
-				}
+			if (gun.curAmmo > 0) {
+				ready(); // Clear curAction so the actor loop doesn't fire multiple times!
+				gun.shoot(this, enemy.pos);
+				return false;
 			} else if (gunIsEquipped) {
-				// If gun is equipped but target is out of range, explicitly block auto-walking
-				sprite.showStatus(CharSprite.NEUTRAL, "Out of range!");
-				ready();
+				if (gun.reserveAmmo > 0) {
+					ready();
+					gun.execute(this, GunWeapon.AC_RELOAD);
+				} else {
+					GLog.w("Click... Empty!");
+					ready();
+				}
 				return false;
 			}
 		}

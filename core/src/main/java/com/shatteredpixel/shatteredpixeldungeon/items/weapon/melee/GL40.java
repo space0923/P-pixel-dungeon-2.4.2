@@ -13,7 +13,7 @@ public class GL40 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.SPECIAL;
-		tier = 10;
+		tier = 16;
 		baseDamage = 0; // Handled by bomb logic natively
 		ACC = 1.0f;
 		accuracyFalloff = 0.0f;

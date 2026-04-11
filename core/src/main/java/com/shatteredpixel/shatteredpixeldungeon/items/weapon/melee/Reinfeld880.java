@@ -11,20 +11,21 @@ public class Reinfeld880 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.SHOTGUN;
-		tier = 10;
-		baseDamage = 60;
+		tier = 14;
+		baseDamage = 90;
 		ACC = 1.0f;
-		accuracyFalloff = 0.15f; // Severe accuracy loss at distance
-		
+		accuracyFalloff = 0.10f; // Severe accuracy loss at distance
+
 		maxAmmo = 8;
 		curAmmo = maxAmmo;
 		maxReserveAmmo = 40;
 		reserveAmmo = maxReserveAmmo;
-		
+
 		burstCount = 1;
 		pellets = 6;
-		
-		DLY = 1.0f;
+
+		DLY = 1.2f;
+		reloadType = ReloadType.OAT;
 		reloadDelay = 1.0f;
 
 		bones = false;

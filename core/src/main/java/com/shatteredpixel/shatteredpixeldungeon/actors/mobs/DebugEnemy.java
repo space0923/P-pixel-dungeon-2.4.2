@@ -22,6 +22,13 @@ public class DebugEnemy extends Mob {
 
 	@Override
 	public int attackSkill(com.shatteredpixel.shatteredpixeldungeon.actors.Char target) {
-		return 0;
+		return 0; // Never hit even if somehow they attack
+	}
+
+	@Override
+	public boolean act() {
+		// Bypass all AI logic. Spend a turn standing completely still.
+		spend(TICK);
+		return true;
 	}
 }

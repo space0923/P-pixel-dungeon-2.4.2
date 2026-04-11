@@ -11,8 +11,8 @@ public class Compact5 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.SMG;
-		tier = 10;
-		baseDamage = 25;
+		tier = 12;
+		baseDamage = 44;
 		ACC = 1.0f;
 		accuracyFalloff = 0.08f;
 		
@@ -21,10 +21,11 @@ public class Compact5 extends GunWeapon {
 		maxReserveAmmo = 120;
 		reserveAmmo = maxReserveAmmo;
 		
-		burstCount = 5;
+		burstCount = 3;
+		RPM = 750;
 		
-		DLY = 0.5f;
-		reloadDelay = 1.0f;
+		DLY = 0.75f;
+		reloadDelay = 1.5f;
 
 		bones = false;
 	}

@@ -13,14 +13,15 @@ public class Bernetti9 extends GunWeapon {
 		hitSound = Assets.Sounds.HIT_Chimano88; // Reusing Chimano88 sound for Bernetti
 		hitSoundPitch = 1f;
 
+		gunType = GunType.PISTOL;
 		tier = 10;
 		baseDamage = 53;
-		maxRange = 3;
+		ACC = 1.0f;
+		accuracyFalloff = 0.05f;
 		maxAmmo = 14;
 		curAmmo = maxAmmo;
 		maxReserveAmmo = 154;
 		reserveAmmo = maxReserveAmmo;
-		RCH = 1;
 		DLY = 0.5f;
 
 		silenced = false; // By default without a silencer? Using chimano sound which says "with

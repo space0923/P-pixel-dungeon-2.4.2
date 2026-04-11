@@ -11,10 +11,10 @@ public class KSP58 extends GunWeapon {
 		hitSoundPitch = 1f;
 
 		gunType = GunType.LMG;
-		tier = 10;
-		baseDamage = 50;
-		ACC = 0.8f;
-		accuracyFalloff = 0.08f;
+		tier = 16;
+		baseDamage = 80;
+		ACC = 0.68f;
+		accuracyFalloff = 0.06f;
 		
 		maxAmmo = 200;
 		curAmmo = maxAmmo;
@@ -22,9 +22,10 @@ public class KSP58 extends GunWeapon {
 		reserveAmmo = maxReserveAmmo;
 		
 		burstCount = 6;
-		
+		RPM = 909;
+
 		DLY = 1.5f; // Heavy and clunky
-		reloadDelay = 3.0f; // Long reload animation equivalent
+		reloadDelay = 3.5f; // Long reload animation equivalent
 
 		bones = false;
 	}

@@ -79,7 +79,7 @@ public class DebugLevel extends RegularLevel {
 			if (mobCell > 0 && mobCell < length() && map[mobCell] == Terrain.EMPTY) {
 				DebugEnemy rat = new DebugEnemy();
 				rat.pos = mobCell;
-				rat.state = rat.WANDERING;
+				rat.state = rat.PASSIVE;
 				mobs.add(rat);
 				spawnAttempts++;
 			}
@@ -90,7 +90,7 @@ public class DebugLevel extends RegularLevel {
 		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Compact5(), entrance);
 		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.M308(), entrance);
 		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KSP58(), entrance);
-		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rattlesnake(), entrance);
+		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.R700(), entrance);
 		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Reinfeld880(), entrance);
 		drop(new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GL40(), entrance);
 	}
