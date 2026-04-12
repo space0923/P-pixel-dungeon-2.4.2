@@ -42,12 +42,39 @@ public class SwarmSprite extends MobSprite {
 		attack = new Animation( 20, false );
 		attack.frames( frames, 6, 7, 8, 9 );
 		
+		zap = attack.clone();
+		
 		die = new Animation( 15, false );
 		die.frames( frames, 10, 11, 12, 13, 14 );
 		
 		play( idle );
 	}
 	
+	public void zap( int cell ) {
+		super.zap( cell );
+		com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile missile = 
+			com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile.boltFromChar( parent,
+				com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile.YELLOW_MAGIC,
+				this,
+				cell,
+				new com.watabou.utils.Callback() {
+					@Override
+					public void call() {
+						((com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Swarm)ch).onZapComplete();
+					}
+				} );
+		missile.setSpeed(400f);
+		com.watabou.noosa.audio.Sample.INSTANCE.play( com.shatteredpixel.shatteredpixeldungeon.Assets.Sounds.ZAP );
+	}
+	
+	@Override
+	public void onComplete( Animation anim ) {
+		if (anim == zap) {
+			idle();
+		}
+		super.onComplete( anim );
+	}
+
 	@Override
 	public int blood() {
 		return 0xFF8BA077;

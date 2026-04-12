@@ -290,38 +290,28 @@ public class Armor extends EquipableItem {
 		return hero.belongings.armor() == this;
 	}
 
+	public final int shieldProvided() {
+		return shieldProvided(level());
+	}
+
+	public int shieldProvided(int lvl) {
+		return Math.max(0, (tier * 20) + (lvl * 5));
+	}
+
 	public final int DRMax(){
-		return DRMax(buffedLvl());
+		return 0;
 	}
 
 	public int DRMax(int lvl){
-		if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-			return 1 + tier + lvl + augment.defenseFactor(lvl);
-		}
-
-		int max = tier * (2 + lvl) + augment.defenseFactor(lvl);
-		if (lvl > max){
-			return ((lvl - max)+1)/2;
-		} else {
-			return max;
-		}
+		return 0;
 	}
 
 	public final int DRMin(){
-		return DRMin(buffedLvl());
+		return 0;
 	}
 
 	public int DRMin(int lvl){
-		if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-			return 0;
-		}
-
-		int max = DRMax(lvl);
-		if (lvl >= max){
-			return (lvl - max);
-		} else {
-			return lvl;
-		}
+		return 0;
 	}
 	
 	public float evasionFactor( Char owner, float evasion ){
@@ -339,8 +329,14 @@ public class Armor extends EquipableItem {
 				evasion += momentum.evasionBonus(((Hero) owner).lvl, Math.max(0, -aEnc));
 			}
 		}
+
+		if (tier <= 1) {
+			evasion += 5;
+		} else {
+			evasion -= (tier - 1) * 5;
+		}
 		
-		return evasion + augment.evasionFactor(buffedLvl());
+		return Math.max(0, evasion + augment.evasionFactor(buffedLvl()));
 	}
 	
 	public float speedFactor( Char owner, float speed ){
@@ -486,13 +482,13 @@ public class Armor extends EquipableItem {
 		
 		if (levelKnown) {
 
-			info += "\n\n" + Messages.get(Armor.class, "curr_absorb", tier, DRMin(), DRMax(), STRReq());
+			info += "\n\n" + "This _tier-" + tier + "_ armor provides _" + shieldProvided() + " max shield_ and requires _" + STRReq() + " strength_ to use properly.";
 			
 			if (STRReq() > Dungeon.hero.STR()) {
 				info += " " + Messages.get(Armor.class, "too_heavy");
 			}
 		} else {
-			info += "\n\n" + Messages.get(Armor.class, "avg_absorb", tier, DRMin(0), DRMax(0), STRReq(0));
+			info += "\n\n" + "This _tier-" + tier + "_ armor provides _" + shieldProvided(0) + " max shield_ and requires _" + STRReq(0) + " strength_ to use properly.";
 
 			if (STRReq(0) > Dungeon.hero.STR()) {
 				info += " " + Messages.get(Armor.class, "probably_too_heavy");

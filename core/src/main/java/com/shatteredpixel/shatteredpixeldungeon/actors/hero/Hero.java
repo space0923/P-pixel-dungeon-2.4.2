@@ -238,6 +238,15 @@ public class Hero extends Char {
 		belongings = new Belongings( this );
 		
 		visibleEnemies = new ArrayList<>();
+
+		// Metaprogression: Apply starting level boost if unlocked
+		if (com.shatteredpixel.shatteredpixeldungeon.SPDSettings.unlockedStartingLevel()) {
+			lvl = 2; // Start at level 2 instead of 1
+			attackSkill++;
+			defenseSkill++;
+			updateHT(true); // Re-calculate max health based on level
+			HP = HT; // Ensure starting health matches the newly boosted max
+		}
 	}
 
 	public void updateHT( boolean boostHP ){

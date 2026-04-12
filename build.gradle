@@ -17,7 +17,7 @@ allprojects {
         appPackageName = 'com.space0923.paydaypixeldungeon'
 
         appVersionCode = 782
-        appVersionName = 'D-U3'
+        appVersionName = 'D-U4'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 

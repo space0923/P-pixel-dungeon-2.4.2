@@ -135,7 +135,8 @@ public class TitleScene extends PixelScene {
 		btnPlay.icon(Icons.get(Icons.ENTER));
 		add(btnPlay);
 
-		StyledButton btnSupport = new SupportButton(GREY_TR, Messages.get(this, "support"));
+		StyledButton btnSupport = new OffshoreUpgradesButton(GREY_TR, "Offshore Upgets");
+		btnSupport.text("Offshore Upgrades");
 		add(btnSupport);
 
 		StyledButton btnRankings = new StyledButton(GREY_TR,Messages.get(this, "rankings")){
@@ -350,9 +351,9 @@ public class TitleScene extends PixelScene {
 		}
 	}
 
-	private static class SupportButton extends StyledButton{
+	private static class OffshoreUpgradesButton extends StyledButton{
 
-		public SupportButton( Chrome.Type type, String label ){
+		public OffshoreUpgradesButton( Chrome.Type type, String label ){
 			super(type, label);
 			icon(Icons.get(Icons.GOLD));
 			textColor(Window.TITLE_COLOR);
@@ -360,7 +361,7 @@ public class TitleScene extends PixelScene {
 
 		@Override
 		protected void onClick() {
-			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
+			ShatteredPixelDungeon.scene().add(new com.shatteredpixel.shatteredpixeldungeon.windows.WndOffshoreUpgrades());
 		}
 	}
 }

@@ -73,6 +73,8 @@ public class MagicMissile extends Emitter {
 	public static final int TOXIC_VENT      = 14;
 	public static final int ELMO            = 15;
 	public static final int POISON          = 16;
+	public static final int YELLOW_MAGIC    = 17;
+	public static final int BLACK_GOO       = 18;
 
 	public static final int MAGIC_MISS_CONE = 100;
 	public static final int FROST_CONE      = 101;
@@ -190,6 +192,14 @@ public class MagicMissile extends Emitter {
 			case POISON:
 				size( 3 );
 				pour( PoisonParticle.MISSILE, 0.01f );
+				break;
+			case YELLOW_MAGIC:
+				size( 4 );
+				pour( YellowMagicParticle.FACTORY, 0.01f );
+				break;
+			case BLACK_GOO:
+				size( 8 );
+				pour( BlackGooParticle.FACTORY, 0.05f );
 				break;
 
 			case MAGIC_MISS_CONE:
@@ -637,6 +647,84 @@ public class MagicMissile extends Emitter {
 			super.update();
 			
 			am = 1 - left / lifespan;
+		}
+	}
+
+	public static class YellowMagicParticle extends PixelParticle {
+		
+		public static final Emitter.Factory FACTORY = new Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((YellowMagicParticle)emitter.recycle( YellowMagicParticle.class )).reset( x, y );
+			}
+			@Override
+			public boolean lightMode() {
+				return true;
+			}
+		};
+
+		public YellowMagicParticle() {
+			super();
+			
+			color( 0xFFFF33 );
+			lifespan = 0.5f;
+			
+			speed.set( Random.Float( -10, +10 ), Random.Float( -10, +10 ) );
+		}
+		
+		public void reset( float x, float y ) {
+			revive();
+			
+			this.x = x;
+			this.y = y;
+			
+			left = lifespan;
+		}
+		
+		@Override
+		public void update() {
+			super.update();
+			// alpha: 1 -> 0; size: 1 -> 4
+			size( 4 - (am = left / lifespan) * 3 );
+		}
+	}
+
+	public static class BlackGooParticle extends PixelParticle {
+		
+		public static final Emitter.Factory FACTORY = new Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((BlackGooParticle)emitter.recycle( BlackGooParticle.class )).reset( x, y );
+			}
+			@Override
+			public boolean lightMode() {
+				return false;
+			}
+		};
+
+		public BlackGooParticle() {
+			super();
+			
+			color( 0x332244 ); // Dark purple-black for contrast!
+			lifespan = 0.6f;
+			
+			speed.set( Random.Float( -20, +20 ), Random.Float( -20, +20 ) );
+		}
+		
+		public void reset( float x, float y ) {
+			revive();
+			
+			this.x = x;
+			this.y = y;
+			
+			left = lifespan;
+		}
+		
+		@Override
+		public void update() {
+			super.update();
+			// Start large (4), shrink to zero (0)
+			size( (left / lifespan) * 6 );
 		}
 	}
 }

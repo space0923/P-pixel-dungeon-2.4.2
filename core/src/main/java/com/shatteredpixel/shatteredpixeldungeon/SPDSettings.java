@@ -487,4 +487,23 @@ public class SPDSettings extends GameSettings {
 	public static void addOffshoreAccount(int amount) {
 		offshoreAccount(offshoreAccount() + amount);
 	}
+
+	public static final String KEY_UPGRADE_STARTING_LEVEL = "upgrade_starting_level";
+	public static final String KEY_UPGRADE_GOLD_GAIN = "upgrade_gold_gain";
+
+	public static void unlockedStartingLevel(boolean value) {
+		put( KEY_UPGRADE_STARTING_LEVEL, value );
+	}
+
+	public static boolean unlockedStartingLevel() {
+		return getBoolean( KEY_UPGRADE_STARTING_LEVEL, false );
+	}
+
+	public static void unlockedGoldGain(boolean value) {
+		put( KEY_UPGRADE_GOLD_GAIN, value );
+	}
+
+	public static boolean unlockedGoldGain() {
+		return getBoolean( KEY_UPGRADE_GOLD_GAIN, false );
+	}
 }

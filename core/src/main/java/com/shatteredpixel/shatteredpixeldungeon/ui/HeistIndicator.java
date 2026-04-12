@@ -61,7 +61,7 @@ public class HeistIndicator extends Tag {
 	public void update() {
 		super.update();
 
-		if (Dungeon.heistManager == null) {
+		if (Dungeon.heistManager == null || (Dungeon.depth % 5 == 0)) {
 			visible = false;
 			return;
 		}

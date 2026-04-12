@@ -836,6 +836,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkWifi;
 		RedButton btnFiftyLevels;
 		RedButton btnDebugLevel;
+		RedButton btnUnlockChallenges;
 
 		@Override
 		protected void createChildren() {
@@ -926,6 +927,16 @@ public class WndSettings extends WndTabbed {
 				};
 				add(btnDebugLevel);
 			}
+
+			btnUnlockChallenges = new RedButton("[DEBUG] Unlock Challenges") {
+				@Override
+				protected void onClick() {
+					com.shatteredpixel.shatteredpixeldungeon.Badges.unlock(com.shatteredpixel.shatteredpixeldungeon.Badges.Badge.VICTORY);
+					com.shatteredpixel.shatteredpixeldungeon.utils.GLog.p("[DEBUG] Challenges unlocked! You can back out to the main menu.");
+					com.watabou.noosa.audio.Sample.INSTANCE.play(com.shatteredpixel.shatteredpixeldungeon.Assets.Sounds.SECRET);
+				}
+			};
+			add(btnUnlockChallenges);
 		}
 
 		@Override
@@ -966,6 +977,17 @@ public class WndSettings extends WndTabbed {
 			if (btnDebugLevel != null){
 				btnDebugLevel.setRect(0, pos + GAP, width, BTN_HEIGHT);
 				pos = btnDebugLevel.bottom();
+			}
+
+			if (btnUnlockChallenges != null){
+				if ((chkWifi != null && pos == chkWifi.bottom()) || 
+					(chkBetas != null && pos == chkBetas.bottom()) || 
+					(chkUpdates != null && pos == chkUpdates.bottom()) || 
+					(chkNews != null && pos == chkNews.bottom())) {
+					pos += GAP * 2; // if right below main UI, add more gap
+				}
+				btnUnlockChallenges.setRect(0, pos + GAP, width, BTN_HEIGHT);
+				pos = btnUnlockChallenges.bottom();
 			}
 
 			height = pos;

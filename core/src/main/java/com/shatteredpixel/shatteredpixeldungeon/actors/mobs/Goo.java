@@ -51,7 +51,7 @@ import com.watabou.utils.Random;
 public class Goo extends Mob {
 
 	{
-		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 750 : 500;
+		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1500 : 1000;
 		EXP = 10;
 		defenseSkill = 8;
 		spriteClass = GooSprite.class;
@@ -96,6 +96,14 @@ public class Goo extends Mob {
 	@Override
 	public int drRoll() {
 		return super.drRoll() + Char.combatRoll(0, 2);
+	}
+
+	@Override
+	public int defenseProc( Char enemy, int damage ) {
+		if (damage > 0 && Random.Int(5) == 0) {
+			spawnMiniGoo(2);
+		}
+		return super.defenseProc(enemy, damage);
 	}
 
 	@Override
@@ -222,6 +230,30 @@ public class Goo extends Mob {
 				sprite.showStatus( CharSprite.WARNING, Messages.get(this, "!!!") );
 				GLog.n( Messages.get(this, "pumpup") );
 			}
+			
+			if ((HP*2 <= HT) && enemy != null) {
+				splatterTargets.clear();
+				int amount = com.watabou.utils.Random.IntRange(7, 8);
+				java.util.ArrayList<Integer> pool = new java.util.ArrayList<>();
+				for (int i = 0; i < com.shatteredpixel.shatteredpixeldungeon.Dungeon.level.length(); i++) {
+					if (com.shatteredpixel.shatteredpixeldungeon.Dungeon.level.distance(i, pos) <= 2 && 
+					    com.shatteredpixel.shatteredpixeldungeon.Dungeon.level.passable[i] && 
+					    i != pos) {
+						pool.add(i);
+					}
+				}
+				
+				com.watabou.utils.Random.shuffle(pool);
+				amount = Math.min(amount, pool.size());
+				
+				for (int i = 0; i < amount; i++) {
+					int targetPos = pool.get(i);
+					splatterTargets.add(targetPos);
+					if (sprite.parent != null) {
+						sprite.parent.addToBack(new com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell(targetPos, 0xFF0000));
+					}
+				}
+			}
 
 			return true;
 		}
@@ -235,6 +267,28 @@ public class Goo extends Mob {
 			if (enemy == Dungeon.hero) {
 				Statistics.qualifiedForBossChallengeBadge = false;
 				Statistics.bossScores[0] -= 100;
+			}
+			
+			if (!splatterTargets.isEmpty()) {
+				for (int cell : splatterTargets) {
+					com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile.boltFromChar(sprite.parent,
+						com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile.BLACK_GOO,
+						sprite,
+						cell,
+						new com.watabou.utils.Callback() {
+							@Override
+							public void call() {
+								Char ch = Actor.findChar(cell);
+								if (ch != null) {
+									int dmg = Char.combatRoll( 5, 6 );
+									ch.damage(dmg, Goo.this);
+									com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect( ch, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze.class ).set( com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze.DURATION );
+								}
+							}
+						}
+					);
+				}
+				splatterTargets.clear();
 			}
 		}
 		return result;
@@ -271,11 +325,36 @@ public class Goo extends Mob {
 			sprite.showStatus(CharSprite.WARNING, Messages.get(this, "enraged"));
 			((GooSprite)sprite).spray(true);
 			yell(Messages.get(this, "gluuurp"));
+			spawnMiniGoo(4);
 		}
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 		if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
 			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(dmg);
 			else                                                    lock.addTime(dmg*1.5f);
+		}
+	}
+
+	private void spawnMiniGoo(int count) {
+		java.util.ArrayList<Integer> candidates = new java.util.ArrayList<>();
+		for (int n : PathFinder.NEIGHBOURS8) {
+			int cell = pos + n;
+			if (cell >= 0 && cell < Dungeon.level.length() && 
+			    !Dungeon.level.solid[cell] && Actor.findChar( cell ) == null && 
+			    (Dungeon.level.passable[cell] || Dungeon.level.avoid[cell])) {
+				candidates.add( cell );
+			}
+		}
+		
+		int spawned = 0;
+		while (spawned < count && candidates.size() > 0) {
+			MiniGoo mGoo = new MiniGoo();
+			mGoo.pos = Random.element(candidates);
+			candidates.remove((Integer)mGoo.pos);
+			mGoo.state = mGoo.HUNTING;
+			GameScene.add(mGoo, 1f);
+			Dungeon.level.occupyCell(mGoo);
+			Actor.add( new com.shatteredpixel.shatteredpixeldungeon.effects.Pushing( mGoo, pos, mGoo.pos ) );
+			spawned++;
 		}
 	}
 
@@ -325,6 +404,9 @@ public class Goo extends Mob {
 
 	private final String PUMPEDUP = "pumpedup";
 	private final String HEALINC = "healinc";
+	private final String SPLATTER_TARGETS = "splatter_targets";
+
+	private java.util.ArrayList<Integer> splatterTargets = new java.util.ArrayList<>();
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -333,6 +415,12 @@ public class Goo extends Mob {
 
 		bundle.put( PUMPEDUP , pumpedUp );
 		bundle.put( HEALINC, healInc );
+		
+		int[] targetsArray = new int[splatterTargets.size()];
+		for (int i = 0; i < splatterTargets.size(); i++) {
+			targetsArray[i] = splatterTargets.get(i);
+		}
+		bundle.put( SPLATTER_TARGETS, targetsArray );
 	}
 
 	@Override
@@ -345,6 +433,13 @@ public class Goo extends Mob {
 		if ((HP*2 <= HT)) BossHealthBar.bleed(true);
 
 		healInc = bundle.getInt(HEALINC);
+		
+		int[] targetsArray = bundle.getIntArray( SPLATTER_TARGETS );
+		if (targetsArray != null) {
+			for (int target : targetsArray) {
+				splatterTargets.add(target);
+			}
+		}
 	}
 	
 }

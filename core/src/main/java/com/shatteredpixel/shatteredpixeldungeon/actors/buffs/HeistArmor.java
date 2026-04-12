@@ -19,8 +19,15 @@ public class HeistArmor extends ShieldBuff {
 		this.armor = armor;
 		if (target != null) {
 			if (armor != null) {
-				// Initialize shield to max on equip
-				incShield(maxShield() - shielding());
+				int targetMax = maxShield();
+				if (shielding() < targetMax) {
+					incShield(targetMax - shielding());
+				} else if (shielding() > targetMax) {
+					decShield(shielding() - targetMax);
+				}
+			} else {
+				decShield(shielding());
+				detach();
 			}
 			target.needsShieldUpdate = true;
 			BuffIndicator.refreshHero();
@@ -29,7 +36,7 @@ public class HeistArmor extends ShieldBuff {
 
 	public synchronized int maxShield() {
 		if (armor != null && target instanceof Hero) {
-			int base = (armor.tier * 10) + (armor.level() * 2);
+			int base = (armor.tier * 20) + (armor.level() * 5);
 			// TESTUDO L2: +10% max shield capacity
 			if (((Hero)target).pointsInTalent(Talent.TESTUDO) == 2) {
 				base = Math.round(base * 1.10f);

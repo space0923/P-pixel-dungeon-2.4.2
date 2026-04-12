@@ -44,7 +44,7 @@ public class Swarm extends Mob {
 	{
 		spriteClass = SwarmSprite.class;
 		
-		HP = HT = 120;
+		HP = HT = 180;
 		defenseSkill = 5;
 
 		EXP = 3;
@@ -56,24 +56,7 @@ public class Swarm extends Mob {
 		lootChance = 0.1667f; //by default, see lootChance()
 	}
 	
-	private static final float SPLIT_DELAY	= 1f;
-	
-	int generation	= 0;
-	
-	private static final String GENERATION	= "generation";
-	
-	@Override
-	public void storeInBundle( Bundle bundle ) {
-		super.storeInBundle( bundle );
-		bundle.put( GENERATION, generation );
-	}
-	
-	@Override
-	public void restoreFromBundle( Bundle bundle ) {
-		super.restoreFromBundle( bundle );
-		generation = bundle.getInt( GENERATION );
-		if (generation > 0) EXP = 0;
-	}
+	private static final float TIME_TO_ZAP	= 1f;
 	
 	@Override
 	public int damageRoll() {
@@ -81,67 +64,52 @@ public class Swarm extends Mob {
 	}
 	
 	@Override
-	public int defenseProc( Char enemy, int damage ) {
-
-		if (HP >= damage + 2) {
-			ArrayList<Integer> candidates = new ArrayList<>();
-			
-			int[] neighbours = {pos + 1, pos - 1, pos + Dungeon.level.width(), pos - Dungeon.level.width()};
-			for (int n : neighbours) {
-				if (!Dungeon.level.solid[n]
-						&& Actor.findChar( n ) == null
-						&& (Dungeon.level.passable[n] || Dungeon.level.avoid[n])
-						&& (!properties().contains(Property.LARGE) || Dungeon.level.openSpace[n])) {
-					candidates.add( n );
-				}
-			}
-	
-			if (candidates.size() > 0) {
-				
-				Swarm clone = split();
-				clone.pos = Random.element( candidates );
-				clone.state = clone.HUNTING;
-				GameScene.add( clone, SPLIT_DELAY ); //we add before assigning HP due to ascension
-
-				clone.HP = (HP - damage) / 2;
-				Actor.add( new Pushing( clone, pos, clone.pos ) );
-
-				Dungeon.level.occupyCell(clone);
-				
-				HP -= clone.HP;
-			}
-		}
-		
-		return super.defenseProc(enemy, damage);
-	}
-	
-	@Override
 	public int attackSkill( Char target ) {
 		return 10;
 	}
+
+	@Override
+	protected boolean canAttack( Char enemy ) {
+		return super.canAttack(enemy)
+				|| new com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica( pos, enemy.pos, com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+	}
+
+	@Override
+	protected boolean doAttack( Char enemy ) {
+		if (Dungeon.level.adjacent( pos, enemy.pos )
+				|| new com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica( pos, enemy.pos, com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica.MAGIC_BOLT).collisionPos != enemy.pos) {
+			return super.doAttack( enemy );
+		} else {
+			if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+				((SwarmSprite)sprite).zap( enemy.pos );
+				return false;
+			} else {
+				zap();
+				return true;
+			}
+		}
+	}
 	
-	private Swarm split() {
-		Swarm clone = new Swarm();
-		clone.generation = generation + 1;
-		clone.EXP = 0;
-		if (buff( Burning.class ) != null) {
-			Buff.affect( clone, Burning.class ).reignite( clone );
+	protected void zap() {
+		spend( TIME_TO_ZAP );
+		Char enemy = this.enemy;
+		if (hit( this, enemy, true )) {
+			int dmg = Char.combatRoll( 10, 14 );
+			dmg = Math.round(dmg * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge.statModifier(this));
+			enemy.damage( dmg, this );
+		} else {
+			enemy.sprite.showStatus( com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite.NEUTRAL, enemy.defenseVerb() );
 		}
-		if (buff( Poison.class ) != null) {
-			Buff.affect( clone, Poison.class ).set(2);
-		}
-		for (Buff b : buffs(AllyBuff.class)){
-			Buff.affect( clone, b.getClass());
-		}
-		for (Buff b : buffs(ChampionEnemy.class)){
-			Buff.affect( clone, b.getClass());
-		}
-		return clone;
+	}
+	
+	public void onZapComplete() {
+		zap();
+		next();
 	}
 
 	@Override
 	public float lootChance() {
-		lootChance = 1f/(6 * (generation+1) );
+		lootChance = 1f/6f;
 		return super.lootChance() * (5f - Dungeon.LimitedDrops.SWARM_HP.count) / 5f;
 	}
 	

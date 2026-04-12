@@ -58,12 +58,19 @@ public class Gold extends Item {
 	@Override
 	public boolean doPickUp(Hero hero, int pos) {
 		
-		Dungeon.gold += quantity;
-		Statistics.goldCollected += quantity;
+		int actualQuantity = quantity;
+		if (com.shatteredpixel.shatteredpixeldungeon.SPDSettings.unlockedGoldGain()) {
+			actualQuantity = Math.round(quantity * 1.05f);
+			// For very small gold piles, ensure they at least get +1 gold
+			if (actualQuantity <= quantity && quantity > 0) actualQuantity = quantity + 1;
+		}
+
+		Dungeon.gold += actualQuantity;
+		Statistics.goldCollected += actualQuantity;
 		Badges.validateGoldCollected();
 
 		GameScene.pickUp( this, pos );
-		hero.sprite.showStatusWithIcon( CharSprite.NEUTRAL, Integer.toString(quantity), FloatingText.GOLD );
+		hero.sprite.showStatusWithIcon( CharSprite.NEUTRAL, Integer.toString(actualQuantity), FloatingText.GOLD );
 		hero.spendAndNext( TIME_TO_PICK_UP );
 		
 		Sample.INSTANCE.play( Assets.Sounds.GOLD, 1, 1, Random.Float( 0.9f, 1.1f ) );

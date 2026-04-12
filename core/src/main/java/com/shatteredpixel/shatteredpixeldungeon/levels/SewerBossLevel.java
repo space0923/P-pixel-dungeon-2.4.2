@@ -131,6 +131,19 @@ public class SewerBossLevel extends SewerLevel {
 
 	@Override
 	protected void createMobs() {
+		int count = Random.IntRange(5, 7);
+		for (int i=0; i < count; i++) {
+			int pos;
+			do {
+				pos = Random.Int( length() );
+			} while (!passable[pos] || Actor.findChar(pos) != null || roomEntrance.inside(cellToPoint(pos)));
+			
+			com.shatteredpixel.shatteredpixeldungeon.actors.mobs.MiniGoo goo = 
+				new com.shatteredpixel.shatteredpixeldungeon.actors.mobs.MiniGoo();
+			goo.pos = pos;
+			goo.state = goo.WANDERING;
+			mobs.add(goo);
+		}
 	}
 	
 	public Actor addRespawner() {

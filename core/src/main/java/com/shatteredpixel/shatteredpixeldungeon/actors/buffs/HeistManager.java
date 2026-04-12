@@ -147,6 +147,10 @@ public class HeistManager implements Bundlable {
 	 * @param elapsed seconds since last frame (Game.elapsed)
 	 */
 	public void update(float elapsed) {
+		if (Dungeon.depth % 5 == 0) {
+			return; // Disable assault spawning during boss fights
+		}
+		
 		if (phase == Phase.STEALTH) {
 			return; // nothing to do in stealth
 		}
