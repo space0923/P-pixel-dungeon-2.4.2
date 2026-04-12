@@ -2,5 +2,5 @@
 
 Finding Payday In The Dungeon
 
-Most textes are generated using ai(placeholder)
+Most textes are generated using ai as placeholder
 
